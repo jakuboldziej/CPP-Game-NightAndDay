@@ -3,6 +3,7 @@
 #include "player.h"
 
 Player *player;
+// GameObject *player;
 
 SDL_Renderer *Game::renderer = nullptr;
 
@@ -53,7 +54,8 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
     std::cout << "Renderer created!" << std::endl;
   }
 
-  player = new Player("E:/programming/C++/SDL2/NightAndDay/assets/Samurai/Walk.png", 0, 720 - 128);
+  player = new Player("E:/programming/C++/SDL2/NightAndDay/assets/Samurai/Samurai_Spritelist.png", 0, 720 - 128, true, 6);
+  // player = new GameObject("E:/programming/C++/SDL2/NightAndDay/assets/Samurai/Samurai_Spritelist.png", 0, 720 - 128, true, 6);
 
   isRunning = true;
   gameState = MENU;
@@ -84,7 +86,6 @@ void Game::handleEvents()
     else if (event.type == SDL_MOUSEBUTTONDOWN)
     {
       SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
-      std::cout << "Mouse Position: " << mousePosition.x << ", " << mousePosition.y << std::endl;
       if (SDL_PointInRect(&mousePosition, &startRect))
       {
         gameState = PLAY;
@@ -123,16 +124,27 @@ void Game::update()
     const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
     if (state[SDL_SCANCODE_W])
+    {
+      // jump
       player->move(0, -1);
-    if (state[SDL_SCANCODE_S])
-      player->move(0, 1);
-    if (state[SDL_SCANCODE_A])
+    }
+    else if (state[SDL_SCANCODE_A])
+    {
       player->move(-1, 0);
-    if (state[SDL_SCANCODE_D])
+      player->play("Run");
+      player->flip = SDL_FLIP_HORIZONTAL;
+    }
+    else if (state[SDL_SCANCODE_D])
+    {
       player->move(1, 0);
+      player->play("Run");
+      player->flip = SDL_FLIP_NONE;
+    }
+    else
+      player->play("Idle");
 
     player->update();
-    player->printInfo("Player");
+    // player->printInfo("Player");
   }
 }
 

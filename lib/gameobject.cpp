@@ -3,11 +3,11 @@
 
 int windowWidth, windowHeight;
 
-GameObject::GameObject(const char *textureSheet, int x, int y, int speed)
+GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, int velocity)
 {
   try
   {
-    texture = TextureManager::LoadTexture(textureSheet);
+    texture = TextureManager::loadTexture(textureSheet);
   }
   catch (const std::exception &e)
   {
@@ -21,7 +21,22 @@ GameObject::GameObject(const char *textureSheet, int x, int y, int speed)
 
   this->x = x;
   this->y = y;
-  this->speed = speed;
+  this->velocity = velocity;
+  this->animated = animated;
+
+  if (animated)
+  {
+    Animation idle = Animation(0, 6, 100);
+
+    animations.emplace("Idle", idle);
+  }
+
+  play("Idle");
+
+  srcRect.x = srcRect.y = 0;
+  srcRect.w = srcRect.h = 128;
+  dstRect.w = srcRect.w;
+  dstRect.h = srcRect.h;
 
   SDL_GetRendererOutputSize(Game::renderer, &windowWidth, &windowHeight);
 }
@@ -30,36 +45,53 @@ GameObject::~GameObject() {}
 
 void GameObject::render()
 {
-  SDL_RenderCopy(Game::renderer, texture, &srcRect, &dstRect);
+  TextureManager::draw(texture, srcRect, dstRect, flip);
 }
 
 void GameObject::update()
 {
-  srcRect.w = 128;
-  srcRect.h = 128;
-  srcRect.x = 0;
-  srcRect.y = 0;
+  if (animated)
+  {
+    int currentFrame = (SDL_GetTicks() / frameSpeed) % frames;
+    srcRect.x = currentFrame * srcRect.w;
+  }
 
-  dstRect.w = srcRect.w;
-  dstRect.h = srcRect.h;
+  srcRect.y = animIndex * srcRect.h;
+
   dstRect.x = x;
   dstRect.y = y;
 }
 
 void GameObject::move(int dx, int dy)
 {
-  if (x + dx * speed < 0 || x + dx * speed + dstRect.w > windowWidth)
+  if (x + dx * velocity < 0 || x + dx * velocity + dstRect.w > windowWidth)
     dx = 0;
 
-  if (y + dy * speed < 0 || y + dy * speed + dstRect.h > windowHeight)
+  if (y + dy * velocity < 0 || y + dy * velocity + dstRect.h > windowHeight)
     dy = 0;
 
-  x += dx * speed;
-  y += dy * speed;
+  x += dx * velocity;
+  y += dy * velocity;
+}
+
+void GameObject::play(const char *animName)
+{
+  if (animations.find(animName) != animations.end())
+  {
+    Animation anim = animations[animName];
+    animIndex = anim.index;
+    frames = anim.frames;
+    frameSpeed = anim.speed;
+  }
+  else
+  {
+    std::cerr << "Animation not found: " << animName << std::endl;
+  }
 }
 
 void GameObject::printInfo(const char *name)
 {
   std::cout << name << ": x: " << x << " y: " << y << std::endl;
   // std::cout << "srcRect: " << srcRect.x << " " << srcRect.y << " " << srcRect.w << " " << srcRect.h << std::endl;
+  std::cout << animations.size() << std::endl;
 }

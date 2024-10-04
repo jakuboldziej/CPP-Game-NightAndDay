@@ -1,25 +1,17 @@
-#pragma once
-
-#include "game.h"
 #include "gameobject.h"
 
 class Player : public GameObject
 {
 public:
-  Player(const char *textureSheet, int x, int y, int speed = 5);
-  ~Player();
+  Player(const char *textureSheet, int x, int y, bool animated = false, int velocity = 5) : GameObject(textureSheet, x, y, animated, velocity)
+  {
+    Animation idle = Animation(0, 6, 100);
+    Animation walk = Animation(1, 9, 100);
+    Animation run = Animation(2, 8, 100);
 
-  void render();
-  void update();
-  void move(int dx, int dy);
-
-  void printInfo(const char *name);
-
-private:
-  int x;
-  int y;
-  int speed;
-
-  SDL_Texture *texture;
-  SDL_Rect srcRect, dstRect;
+    animations.emplace("Idle", idle);
+    animations.emplace("Walk", walk);
+    animations.emplace("Run", run);
+  };
+  ~Player() {};
 };
