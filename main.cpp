@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <crtdbg.h>
 
 #include "game.h"
 
@@ -7,8 +6,6 @@ Game *game;
 
 int main()
 {
-  _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
   const int FPS = 165;
   const int frameDelay = 1000 / FPS;
 
@@ -35,8 +32,6 @@ int main()
   }
 
   game->clean();
-
-  _CrtDumpMemoryLeaks();
 
   return 0;
 }
