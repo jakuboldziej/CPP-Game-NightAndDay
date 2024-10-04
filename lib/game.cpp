@@ -54,8 +54,9 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
     std::cout << "Renderer created!" << std::endl;
   }
 
-  player = new Player("E:/programming/C++/SDL2/NightAndDay/assets/Samurai/Samurai_Spritelist.png", 0, 720 - 128, true, 6);
-  // player = new GameObject("E:/programming/C++/SDL2/NightAndDay/assets/Samurai/Samurai_Spritelist.png", 0, 720 - 128, true, 6);
+  char *basePath = SDL_GetBasePath();
+  std::string playerPath = std::string(basePath) + "assets/Samurai/Samurai_Spritelist.png";
+  player = new Player(playerPath.c_str(), 0, 720 - 128, true, 6);
 
   isRunning = true;
   gameState = MENU;
@@ -157,7 +158,9 @@ void Game::render()
     int paddingW = 300;
     int paddingH = 50;
 
-    TTF_Font *font = TTF_OpenFont("C:/Windows/Fonts/VGASYSE.FON", 72);
+    char *basePath = SDL_GetBasePath();
+    std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
+    TTF_Font *font = TTF_OpenFont(fontPath.c_str(), 72);
     SDL_Color white = {255, 255, 255};
 
     // Menu Title
