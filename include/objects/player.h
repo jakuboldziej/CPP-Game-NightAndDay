@@ -27,11 +27,12 @@ public:
     animations.emplace("Hurt", hurt);
     animations.emplace("Death", death);
 
-    Hitbox idleHitbox = Hitbox(dstRect.w - 81, dstRect.h - 59, dstRect.x + 27, dstRect.y + 59);
-    Hitbox runHitbox = Hitbox(dstRect.w - 81, dstRect.h - 59, dstRect.x + 27, dstRect.y + 59);
+    Hitbox idleHitbox = Hitbox(dstRect.w - 102, dstRect.h - 59, 47, 59);
+    Hitbox runHitbox = Hitbox(dstRect.w - 91, dstRect.h - 59, 52, 59);
 
     hitboxSizes.emplace("Idle", idleHitbox);
     hitboxSizes.emplace("Run", runHitbox);
+    hitboxSizes.emplace("Jump", idleHitbox);
   };
   ~Player() {};
 
@@ -86,7 +87,6 @@ private:
     {
       yVelocity += gravity;
       y += yVelocity;
-      std::cout << yVelocity << std::endl;
     }
   }
 };

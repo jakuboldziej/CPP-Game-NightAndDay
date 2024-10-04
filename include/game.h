@@ -2,6 +2,7 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
@@ -25,7 +26,7 @@ public:
   void update();
   void render();
   bool running() { return isRunning; }
-  bool checkCollision(const SDL_Rect &a, const SDL_Rect &b);
+  static bool checkCollision(const SDL_Rect &a, const SDL_Rect &b);
   void clean();
 
   static SDL_Renderer *renderer;

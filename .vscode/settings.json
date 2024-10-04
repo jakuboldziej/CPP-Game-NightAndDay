@@ -10,6 +10,7 @@
     "chrono": "cpp",
     "clocale": "cpp",
     "cmath": "cpp",
+    "codecvt": "cpp",
     "compare": "cpp",
     "concepts": "cpp",
     "condition_variable": "cpp",
@@ -66,7 +67,6 @@
     "thread": "cpp",
     "cinttypes": "cpp",
     "typeinfo": "cpp",
-    "variant": "cpp",
-    "codecvt": "cpp"
+    "variant": "cpp"
   }
 }

@@ -2,10 +2,9 @@
 
 #include <map>
 #include <utility>
-#include <string>
 
 #include "game.h"
-#include "animation.h"
+#include "utils/animation.h"
 #include "hitbox.h"
 
 class GameObject
@@ -19,6 +18,7 @@ public:
   void update();
   void move(int dx, int dy);
   void play(const char *animName);
+  SDL_Rect getHitbox() { return hitboxRect; }
 
   void printInfo(const char *name);
 
@@ -36,7 +36,8 @@ protected:
   SDL_Rect srcRect, dstRect, hitboxRect;
 
   int animIndex = 0;
-  std::string currentAnimation = "Idle";
+  std::string currentAnimation;
+
   std::map<std::string, Animation> animations;
   std::map<std::string, Hitbox> hitboxSizes;
 };

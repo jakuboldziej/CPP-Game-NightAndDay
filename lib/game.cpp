@@ -1,20 +1,24 @@
 #include "game.h"
-#include "gameobject.h"
-#include "player.h"
+#include "views/pause.h"
+#include "views/menu.h"
 
-Player *player;
-GameObject *object;
+#include "objects/gameobject.h"
+#include "objects/player.h"
+
+Pause *pause = new Pause();
+Menu *menu = new Menu();
 
 int Game::windowWidth = 0;
 int Game::windowHeight = 0;
-
 SDL_Renderer *Game::renderer = nullptr;
+
+TTF_Font *font = nullptr;
+
+Player *player = nullptr;
+GameObject *arrow = nullptr;
 
 Game::Game() {};
 Game::~Game() {};
-
-SDL_Rect startRect;
-SDL_Rect quitRect;
 
 void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
 {
@@ -58,16 +62,18 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
   if (renderer)
   {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     std::cout << "Renderer created!" << std::endl;
   }
 
   char *basePath = SDL_GetBasePath();
 
   std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
-  player = new Player(playerPath.c_str(), 0, 720 - 128, true);
+  std::string arrowPath = std::string(basePath) + "assets/sprites/Samurai_Archer/Arrow.png";
 
-  object = new GameObject(playerPath.c_str(), 200, 720 - 128, true);
+  player = new Player(playerPath.c_str(), 0, 720 - 128, true);
+  arrow = new GameObject(arrowPath.c_str(), 200, 720 - 128, false);
+
+  SDL_free(basePath);
 
   isRunning = true;
   gameState = MENU;
@@ -79,34 +85,10 @@ void Game::handleEvents()
 
   SDL_Event event;
   SDL_PollEvent(&event);
+
   if (gameState == MENU)
   {
-    if (event.type == SDL_KEYDOWN)
-    {
-      switch (event.key.keysym.sym)
-      {
-      case SDLK_RETURN:
-        gameState = PLAY;
-        break;
-      case SDLK_ESCAPE:
-        isRunning = false;
-        break;
-      default:
-        break;
-      }
-    }
-    else if (event.type == SDL_MOUSEBUTTONDOWN)
-    {
-      SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
-      if (SDL_PointInRect(&mousePosition, &startRect))
-      {
-        gameState = PLAY;
-      }
-      else if (SDL_PointInRect(&mousePosition, &quitRect))
-      {
-        isRunning = false;
-      }
-    }
+    menu->handleEvents(mousePosition, event, gameState, isRunning);
   }
   else if (gameState == PLAY)
   {
@@ -117,10 +99,7 @@ void Game::handleEvents()
   }
   else if (gameState == PAUSE)
   {
-    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-    {
-      gameState = PLAY;
-    }
+    pause->handleEvents(mousePosition, event, gameState);
   }
 
   if (event.type == SDL_QUIT)
@@ -140,7 +119,7 @@ void Game::update()
       if (!player->isJumping() && player->isOnGround())
         player->jump();
     }
-    if (state[SDL_SCANCODE_A])
+    else if (state[SDL_SCANCODE_A])
     {
       player->move(-1, 0);
       player->play("Run");
@@ -156,9 +135,13 @@ void Game::update()
       player->play("Idle");
 
     player->update();
-    // object->update();
+    arrow->update();
     // player->printInfo("Player");
-    // object->printInfo("Object");
+    // arrow->printInfo("Arrow");
+    if (checkCollision(player->getHitbox(), arrow->getHitbox()))
+    {
+      std::cout << "collision" << std::endl;
+    }
   }
 }
 
@@ -166,51 +149,26 @@ void Game::render()
 {
   SDL_RenderClear(renderer);
 
+  char *basePath = SDL_GetBasePath();
+  std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
+  TTF_Font *font = TTF_OpenFont(fontPath.c_str(), 72);
+
+  SDL_Color white = {255, 255, 255};
+
   if (gameState == MENU)
   {
-    int paddingW = 300;
-    int paddingH = 50;
-
-    char *basePath = SDL_GetBasePath();
-    std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
-    TTF_Font *font = TTF_OpenFont(fontPath.c_str(), 72);
-    SDL_Color white = {255, 255, 255};
-
-    // Menu Title
-    SDL_Surface *titleSurface = TTF_RenderText_Solid(font, "MAIN MENU", white);
-    SDL_Texture *titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
-    SDL_Rect titleRect = {(windowWidth - titleSurface->w - paddingW) / 2, 100, titleSurface->w + paddingW, titleSurface->h + paddingH};
-    SDL_RenderCopy(renderer, titleTexture, NULL, &titleRect);
-
-    // Start Option
-    SDL_Surface *startSurface = TTF_RenderText_Solid(font, "Start", white);
-    SDL_Texture *startTexture = SDL_CreateTextureFromSurface(renderer, startSurface);
-    startRect = {(windowWidth - startSurface->w - paddingW + 200) / 2, 300, startSurface->w + paddingW - 200, startSurface->h + paddingH};
-    SDL_RenderCopy(renderer, startTexture, NULL, &startRect);
-
-    // Quit Option
-    SDL_Surface *quitSurface = TTF_RenderText_Solid(font, "Quit", white);
-    SDL_Texture *quitTexture = SDL_CreateTextureFromSurface(renderer, quitSurface);
-    quitRect = {(windowWidth - quitSurface->w - paddingW + 200) / 2, 500, quitSurface->w + paddingW - 200, quitSurface->h + paddingH};
-    SDL_RenderCopy(renderer, quitTexture, NULL, &quitRect);
-
-    SDL_FreeSurface(titleSurface);
-    SDL_FreeSurface(startSurface);
-    SDL_FreeSurface(quitSurface);
-    SDL_DestroyTexture(titleTexture);
-    SDL_DestroyTexture(startTexture);
-    SDL_DestroyTexture(quitTexture);
-    TTF_CloseFont(font);
+    menu->render(font);
   }
   else if (gameState == PLAY)
   {
     player->render();
-    object->render();
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    arrow->render();
+
+    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
   }
   else if (gameState == PAUSE)
   {
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    pause->render(font);
   }
 
   SDL_RenderPresent(renderer);
@@ -218,12 +176,15 @@ void Game::render()
 
 bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
 {
-  return false;
+  return SDL_HasIntersection(&a, &b);
 }
 
 void Game::clean()
 {
-  SDL_DestroyWindow(window);
+  TTF_CloseFont(font);
   SDL_DestroyRenderer(renderer);
+  SDL_DestroyWindow(window);
+  TTF_Quit();
+  IMG_Quit();
   SDL_Quit();
 }
