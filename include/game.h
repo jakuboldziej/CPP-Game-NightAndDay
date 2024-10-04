@@ -19,20 +19,21 @@ class Game
 public:
   Game();
   ~Game();
+
   void init(const char *title, int xpos, int ypos, bool fullscreen);
   void handleEvents();
   void update();
   void render();
-  void clean();
   bool running() { return isRunning; }
+  bool checkCollision(const SDL_Rect &a, const SDL_Rect &b);
+  void clean();
 
   static SDL_Renderer *renderer;
 
-  int windowWidth = 1280;
-  int windowHeight = 720;
+  static int windowWidth;
+  static int windowHeight;
 
 private:
-  int count = 0;
   bool isRunning = false;
   SDL_Window *window;
   GameState gameState;

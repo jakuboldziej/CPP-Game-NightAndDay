@@ -1,8 +1,6 @@
 #include "gameobject.h"
 #include "texturemanager.h"
 
-int windowWidth, windowHeight;
-
 GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, int velocity)
 {
   try
@@ -24,21 +22,21 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, in
   this->velocity = velocity;
   this->animated = animated;
 
+  srcRect.x = srcRect.y = 0;
+  srcRect.w = srcRect.h = 128;
+
+  dstRect.w = srcRect.w;
+  dstRect.h = srcRect.h;
+  dstRect.x = x;
+  dstRect.y = y;
+
   if (animated)
   {
     Animation idle = Animation(0, 6, 100);
 
     animations.emplace("Idle", idle);
+    play("Idle");
   }
-
-  play("Idle");
-
-  srcRect.x = srcRect.y = 0;
-  srcRect.w = srcRect.h = 128;
-  dstRect.w = srcRect.w;
-  dstRect.h = srcRect.h;
-
-  SDL_GetRendererOutputSize(Game::renderer, &windowWidth, &windowHeight);
 }
 
 GameObject::~GameObject() {}
@@ -46,6 +44,10 @@ GameObject::~GameObject() {}
 void GameObject::render()
 {
   TextureManager::draw(texture, srcRect, dstRect, flip);
+
+  // Hitbox
+  SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+  SDL_RenderDrawRect(Game::renderer, &hitboxRect);
 }
 
 void GameObject::update()
@@ -60,15 +62,15 @@ void GameObject::update()
 
   dstRect.x = x;
   dstRect.y = y;
+
+  hitboxRect.x = dstRect.x;
+  hitboxRect.y = dstRect.y;
 }
 
 void GameObject::move(int dx, int dy)
 {
-  if (x + dx * velocity < 0 || x + dx * velocity + dstRect.w > windowWidth)
+  if (hitboxRect.x + dx * velocity < 0 || hitboxRect.x + dx * velocity + hitboxRect.w > Game::windowWidth)
     dx = 0;
-
-  if (y + dy * velocity < 0 || y + dy * velocity + dstRect.h > windowHeight)
-    dy = 0;
 
   x += dx * velocity;
   y += dy * velocity;
@@ -82,6 +84,16 @@ void GameObject::play(const char *animName)
     animIndex = anim.index;
     frames = anim.frames;
     frameSpeed = anim.speed;
+
+    currentAnimation = animName;
+
+    if (hitboxSizes.find(animName) != hitboxSizes.end())
+    {
+      hitboxRect.w = hitboxSizes[animName].width;
+      hitboxRect.h = hitboxSizes[animName].height;
+      hitboxRect.x = hitboxSizes[animName].offsetX;
+      hitboxRect.y = hitboxSizes[animName].offsetY;
+    }
   }
   else
   {
@@ -91,7 +103,9 @@ void GameObject::play(const char *animName)
 
 void GameObject::printInfo(const char *name)
 {
-  std::cout << name << ": x: " << x << " y: " << y << std::endl;
-  // std::cout << "srcRect: " << srcRect.x << " " << srcRect.y << " " << srcRect.w << " " << srcRect.h << std::endl;
-  std::cout << animations.size() << std::endl;
+  // std::cout << "|" << name << "| " << ": x: " << x << " y: " << y << std::endl;
+  // std::cout << "|" << name << "| " << "srcRect - x: " << srcRect.x << " y: " << srcRect.y << " w: " << srcRect.w << " h: " << srcRect.h << std::endl;
+  std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << std::endl;
+  // std::cout << "|" << name << "| " << animations.size() << std::endl;
+  // std::cout << "|" << name << "| " << y << " " << srcRect.h << " " << Game::windowHeight << std::endl;
 }

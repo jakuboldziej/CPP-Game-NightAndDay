@@ -6,11 +6,12 @@
 
 #include "game.h"
 #include "animation.h"
+#include "hitbox.h"
 
 class GameObject
 {
 public:
-  GameObject(const char *textureSheet, int x, int y, bool animated = false, int velocity = 5);
+  GameObject(const char *textureSheet, int x, int y, bool animated = false, int velocity = 4);
 
   ~GameObject();
 
@@ -32,8 +33,10 @@ protected:
   int frameSpeed = 100;
 
   SDL_Texture *texture;
-  SDL_Rect srcRect, dstRect;
+  SDL_Rect srcRect, dstRect, hitboxRect;
 
   int animIndex = 0;
+  std::string currentAnimation = "Idle";
   std::map<std::string, Animation> animations;
+  std::map<std::string, Hitbox> hitboxSizes;
 };

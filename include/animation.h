@@ -13,4 +13,5 @@ struct Animation
     frames = f;
     speed = s;
   }
+  ~Animation() {};
 };

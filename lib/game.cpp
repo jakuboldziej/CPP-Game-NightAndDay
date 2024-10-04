@@ -3,7 +3,10 @@
 #include "player.h"
 
 Player *player;
-// GameObject *player;
+GameObject *object;
+
+int Game::windowWidth = 0;
+int Game::windowHeight = 0;
 
 SDL_Renderer *Game::renderer = nullptr;
 
@@ -21,6 +24,11 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
     flags = SDL_WINDOW_FULLSCREEN;
     windowWidth = 1920;
     windowHeight = 1080;
+  }
+  else
+  {
+    windowWidth = 1280;
+    windowHeight = 720;
   }
 
   if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -55,8 +63,11 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
   }
 
   char *basePath = SDL_GetBasePath();
-  std::string playerPath = std::string(basePath) + "assets/Samurai/Samurai_Spritelist.png";
-  player = new Player(playerPath.c_str(), 0, 720 - 128, true, 6);
+
+  std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
+  player = new Player(playerPath.c_str(), 0, 720 - 128, true);
+
+  object = new GameObject(playerPath.c_str(), 200, 720 - 128, true);
 
   isRunning = true;
   gameState = MENU;
@@ -124,12 +135,12 @@ void Game::update()
   {
     const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
-    if (state[SDL_SCANCODE_W])
+    if (state[SDL_SCANCODE_SPACE])
     {
-      // jump
-      player->move(0, -1);
+      if (!player->isJumping() && player->isOnGround())
+        player->jump();
     }
-    else if (state[SDL_SCANCODE_A])
+    if (state[SDL_SCANCODE_A])
     {
       player->move(-1, 0);
       player->play("Run");
@@ -145,7 +156,9 @@ void Game::update()
       player->play("Idle");
 
     player->update();
+    // object->update();
     // player->printInfo("Player");
+    // object->printInfo("Object");
   }
 }
 
@@ -191,8 +204,9 @@ void Game::render()
   }
   else if (gameState == PLAY)
   {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     player->render();
+    object->render();
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   }
   else if (gameState == PAUSE)
   {
@@ -200,6 +214,11 @@ void Game::render()
   }
 
   SDL_RenderPresent(renderer);
+}
+
+bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
+{
+  return false;
 }
 
 void Game::clean()
