@@ -78,7 +78,7 @@ void GameObject::update()
 
 void GameObject::move(int dx, int dy)
 {
-  if (hitboxRect.x + dx * velocity <= 0 || hitboxRect.x + dx * velocity + hitboxRect.w >= Game::windowWidth)
+  if (hitboxRect.x + dx * velocity < 0 || hitboxRect.x + dx * velocity + hitboxRect.w >= Game::windowWidth)
     dx = 0;
 
   x += dx * velocity;

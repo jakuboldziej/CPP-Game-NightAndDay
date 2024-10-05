@@ -1,12 +1,14 @@
 #include "game.h"
-#include "views/pause.h"
 #include "views/menu.h"
+#include "views/play.h"
+#include "views/pause.h"
 
 #include "objects/gameobject.h"
 #include "objects/player.h"
 
-Pause *pause = new Pause();
-Menu *menu = new Menu();
+Menu menu;
+Play play;
+Pause pause;
 
 int Game::windowWidth = 0;
 int Game::windowHeight = 0;
@@ -15,10 +17,13 @@ SDL_Renderer *Game::renderer = nullptr;
 TTF_Font *font = nullptr;
 
 Player *player = nullptr;
-GameObject *arrow = nullptr;
 
 Game::Game() {};
-Game::~Game() {};
+Game::~Game()
+{
+  delete player;
+  clean();
+}
 
 void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
 {
@@ -71,9 +76,19 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
   std::string arrowPath = std::string(basePath) + "assets/sprites/Samurai_Archer/Arrow.png";
 
   player = new Player(playerPath.c_str(), 0, 720 - 128, true);
-  arrow = new GameObject(arrowPath.c_str(), 200, 720 - 128, false);
+
+  std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
+  font = TTF_OpenFont(fontPath.c_str(), 72);
+  if (!font)
+  {
+    std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
+  }
 
   SDL_free(basePath);
+
+  menu = Menu();
+  play = Play();
+  pause = Pause();
 
   isRunning = true;
   gameState = MENU;
@@ -82,24 +97,20 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
 void Game::handleEvents()
 {
   SDL_Point mousePosition;
-
   SDL_Event event;
   SDL_PollEvent(&event);
 
   if (gameState == MENU)
   {
-    menu->handleEvents(mousePosition, event, gameState, isRunning);
+    menu.handleEvents(mousePosition, event, gameState, isRunning);
   }
   else if (gameState == PLAY)
   {
-    if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
-    {
-      gameState = PAUSE;
-    }
+    play.handleEvents(event, gameState);
   }
   else if (gameState == PAUSE)
   {
-    pause->handleEvents(mousePosition, event, gameState);
+    pause.handleEvents(mousePosition, event, gameState);
   }
 
   if (event.type == SDL_QUIT)
@@ -112,36 +123,7 @@ void Game::update()
 {
   if (gameState == PLAY)
   {
-    const Uint8 *state = SDL_GetKeyboardState(nullptr);
-
-    if (state[SDL_SCANCODE_SPACE])
-    {
-      if (!player->isJumping() && player->isOnGround())
-        player->jump();
-    }
-    else if (state[SDL_SCANCODE_A])
-    {
-      player->move(-1, 0);
-      player->play("Run");
-      player->flip = SDL_FLIP_HORIZONTAL;
-    }
-    else if (state[SDL_SCANCODE_D])
-    {
-      player->move(1, 0);
-      player->play("Run");
-      player->flip = SDL_FLIP_NONE;
-    }
-    else
-      player->play("Idle");
-
-    player->update();
-    arrow->update();
-    // player->printInfo("Player");
-    // arrow->printInfo("Arrow");
-    if (checkCollision(player->getHitbox(), arrow->getHitbox()))
-    {
-      std::cout << "collision" << std::endl;
-    }
+    play.update(player);
   }
 }
 
@@ -149,26 +131,19 @@ void Game::render()
 {
   SDL_RenderClear(renderer);
 
-  char *basePath = SDL_GetBasePath();
-  std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
-  TTF_Font *font = TTF_OpenFont(fontPath.c_str(), 72);
-
   SDL_Color white = {255, 255, 255};
 
   if (gameState == MENU)
   {
-    menu->render(font);
+    menu.render(font);
   }
   else if (gameState == PLAY)
   {
-    player->render();
-    arrow->render();
-
-    SDL_SetRenderDrawColor(renderer, 60, 60, 60, 255);
+    play.render(player);
   }
   else if (gameState == PAUSE)
   {
-    pause->render(font);
+    pause.render(font);
   }
 
   SDL_RenderPresent(renderer);
@@ -181,7 +156,11 @@ bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
 
 void Game::clean()
 {
-  TTF_CloseFont(font);
+  if (font)
+  {
+    TTF_CloseFont(font);
+    font = nullptr;
+  }
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
   TTF_Quit();

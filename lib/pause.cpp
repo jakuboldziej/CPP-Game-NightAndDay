@@ -41,7 +41,6 @@ void Pause::render(TTF_Font *font)
   SDL_FreeSurface(resumeSurface);
   SDL_DestroyTexture(pauseTexture);
   SDL_DestroyTexture(resumeTexture);
-  TTF_CloseFont(font);
 
   SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
 }

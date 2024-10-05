@@ -66,7 +66,6 @@ void Menu::render(TTF_Font *font)
   SDL_DestroyTexture(titleTexture);
   SDL_DestroyTexture(startTexture);
   SDL_DestroyTexture(quitTexture);
-  TTF_CloseFont(font);
 
   SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
 }

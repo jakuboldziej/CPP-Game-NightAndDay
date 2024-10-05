@@ -1,4 +1,6 @@
-#include "gameobject.h"
+#pragma once
+
+#include "objects/gameobject.h"
 
 class Player : public GameObject
 {

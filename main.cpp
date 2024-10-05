@@ -33,5 +33,7 @@ int main()
 
   game->clean();
 
+  delete game;
+
   return 0;
 }
