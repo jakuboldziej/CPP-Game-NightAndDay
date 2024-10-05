@@ -25,11 +25,17 @@ public:
   ~Game();
 
   void init(const char *title, int xpos, int ypos, bool fullscreen);
+
   void handleEvents();
   void update();
   void render();
   bool running() { return isRunning; }
+
   static bool checkCollision(const SDL_Rect &a, const SDL_Rect &b);
+
+  static void initGameEntites();
+  static void clearGameEntites();
+
   void clean();
 
   static SDL_Renderer *renderer;
@@ -39,6 +45,8 @@ public:
 
   static char *basePath;
   static TTF_Font *font;
+
+  static bool fullscreen;
 
 private:
   bool isRunning = false;

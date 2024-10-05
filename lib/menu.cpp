@@ -1,36 +1,26 @@
 #include "views/menu.h"
 #include "ui/button.h"
 
-Button *startBtn;
-Button *quitBtn;
-Button *mainMenuBtn;
+Button *mainMenu;
 
 Menu::Menu()
 {
-  mainMenuBtn = new Button("text", 0, 100, "MAIN MENU", 6, true);
-  startBtn = new Button("text", 0, 300, "Start", 4, true);
-  quitBtn = new Button("text", 0, 500, "Quit", 4, true);
+  mainMenu = new Button("text", 0, Game::fullscreen ? 162 * 1.5 : 162, "MAIN MENU", 6, true);
+  buttons["Start"] = new Button("text", 0, Game::fullscreen ? 341 * 1.5 : 341, "Start", 4, true);
+  buttons["Quit"] = new Button("text", 0, Game::fullscreen ? 493 * 1.5 : 493, "Quit", 4, true);
 
-  buttons.emplace("Start", startBtn);
-  buttons.emplace("Quit", quitBtn);
+  std::string gearPath = std::string(Game::basePath) + "assets/images/gear.png";
+  buttons["Gear"] = new Button("image", Game::windowWidth - 64, Game::windowHeight - 64, gearPath.c_str(), false);
 }
+
 Menu::~Menu() {}
 
 void Menu::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &gameState, bool &isRunning)
 {
   if (event.type == SDL_KEYDOWN)
   {
-    switch (event.key.keysym.sym)
-    {
-    case SDLK_RETURN:
+    if (event.key.keysym.sym == SDLK_RETURN)
       gameState = PLAY;
-      break;
-    case SDLK_ESCAPE:
-      isRunning = false;
-      break;
-    default:
-      break;
-    }
   }
   else if (event.type == SDL_MOUSEBUTTONDOWN)
   {
@@ -38,14 +28,21 @@ void Menu::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &ga
 
     SDL_Rect startRect = buttons["Start"]->getDstRect();
     SDL_Rect quitRect = buttons["Quit"]->getDstRect();
+    SDL_Rect gearBtnRect = buttons["Gear"]->getDstRect();
 
     if (SDL_PointInRect(&mousePosition, &startRect))
     {
+      Game::clearGameEntites();
+      Game::initGameEntites();
       gameState = PLAY;
     }
     else if (SDL_PointInRect(&mousePosition, &quitRect))
     {
       isRunning = false;
+    }
+    else if (SDL_PointInRect(&mousePosition, &gearBtnRect))
+    {
+      std::cout << "Settings" << std::endl;
     }
   }
 }
@@ -58,36 +55,13 @@ void Menu::render()
   SDL_Point mousePosition;
   SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
-  // Menu Title
-  mainMenuBtn->render();
+  mainMenu->render();
 
-  // Start Option
-  startBtn->render();
+  buttons["Start"]->render(true);
 
-  // if (SDL_PointInRect(&mousePosition, &startBtn->getDstRect()))
-  // {
-  //   SDL_Surface *startShadowSurface = TTF_RenderText_Solid(Game::font, "Start", GRAY);
-  //   SDL_Texture *startShadowTexture = SDL_CreateTextureFromSurface(Game::renderer, startShadowSurface);
-  //   SDL_Rect startShadowRect = {startBtn->getDstRect().x + 2, startBtn->getDstRect().y + 2, startBtn->getDstRect().w, startBtn->getDstRect().h};
-  //   SDL_RenderCopy(Game::renderer, startShadowTexture, NULL, &startShadowRect);
+  buttons["Quit"]->render(true);
 
-  //   SDL_FreeSurface(startShadowSurface);
-  //   SDL_DestroyTexture(startShadowTexture);
-  // }
-
-  // Quit Option
-  quitBtn->render();
-
-  // if (SDL_PointInRect(&mousePosition, &quitRect))
-  // {
-  //   SDL_Surface *quitShadowSurface = TTF_RenderText_Solid(Game::font, "Quit", GRAY);
-  //   SDL_Texture *quitShadowTexture = SDL_CreateTextureFromSurface(Game::renderer, quitShadowSurface);
-  //   SDL_Rect quitShadowRect = {quitRect.x + 2, quitRect.y + 2, quitRect.w, quitRect.h};
-  //   SDL_RenderCopy(Game::renderer, quitShadowTexture, NULL, &quitShadowRect);
-
-  //   SDL_FreeSurface(quitShadowSurface);
-  //   SDL_DestroyTexture(quitShadowTexture);
-  // }
+  buttons["Gear"]->render();
 
   SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
 }

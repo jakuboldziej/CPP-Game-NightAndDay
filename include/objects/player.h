@@ -36,7 +36,7 @@ public:
     hitboxSizes.emplace("Run", runHitbox);
     hitboxSizes.emplace("Jump", idleHitbox);
   };
-  ~Player() {};
+  ~Player() {}
 
   void jump() { jumping = true; }
   bool isJumping() { return jumping; }

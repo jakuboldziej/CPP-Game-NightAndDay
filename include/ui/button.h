@@ -26,7 +26,7 @@ public:
 
   ~Button() {}
 
-  void render()
+  void render(bool shadow = false)
   {
     if (strcmp(typeStr, "image") == 0)
     {
@@ -35,6 +35,17 @@ public:
     else if (strcmp(typeStr, "text") == 0)
     {
       SDL_RenderCopy(Game::renderer, texture, NULL, &dstRect);
+
+      if (shadow == true)
+      {
+        SDL_Point mousePosition;
+        SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
+
+        if (SDL_PointInRect(&mousePosition, &dstRect))
+        {
+          SDL_RenderCopy(Game::renderer, shadowTexture, NULL, &shadowRect);
+        }
+      }
     }
 
     // Hitbox
@@ -43,11 +54,6 @@ public:
   }
 
   SDL_Rect getDstRect() { return dstRect; }
-
-  void click()
-  {
-    std::cout << "Button click" << std::endl;
-  }
 
   void printInfo()
   {
@@ -65,7 +71,8 @@ protected:
   const char *typeStr;
 
   SDL_Texture *texture;
-  SDL_Rect srcRect, dstRect;
+  SDL_Texture *shadowTexture;
+  SDL_Rect srcRect, dstRect, shadowRect;
 
   void initImage(const char *btnText)
   {
@@ -103,11 +110,11 @@ protected:
 
   void initText(const char *name)
   {
-    SDL_Surface *startSurface = TTF_RenderText_Solid(Game::font, name, WHITE);
-    texture = SDL_CreateTextureFromSurface(Game::renderer, startSurface);
+    SDL_Surface *buttonSurface = TTF_RenderText_Solid(Game::font, name, WHITE);
+    texture = SDL_CreateTextureFromSurface(Game::renderer, buttonSurface);
 
-    int scaledWidth = startSurface->w * scale;
-    int scaledHeight = startSurface->h * scale;
+    int scaledWidth = buttonSurface->w * scale;
+    int scaledHeight = buttonSurface->h * scale;
 
     if (center)
       dstRect.x = (Game::windowWidth - scaledWidth) / 2;
@@ -117,7 +124,15 @@ protected:
     dstRect.w = scaledWidth;
     dstRect.h = scaledHeight;
 
-    // SDL_FreeSurface(startSurface);
+    SDL_Surface *shadowSurface = TTF_RenderText_Solid(Game::font, name, GRAY);
+    shadowTexture = SDL_CreateTextureFromSurface(Game::renderer, shadowSurface);
+
+    shadowRect.x = dstRect.x + 2;
+    shadowRect.y = dstRect.y + 2;
+    shadowRect.w = dstRect.w;
+    shadowRect.h = dstRect.h;
+
+    // SDL_FreeSurface(buttonSurface);
     // SDL_DestroyTexture(texture);
   }
 };

@@ -13,9 +13,9 @@ Pause *pause;
 
 int Game::windowWidth = 0;
 int Game::windowHeight = 0;
-SDL_Renderer *Game::renderer = nullptr;
 char *Game::basePath = nullptr;
-
+bool Game::fullscreen;
+SDL_Renderer *Game::renderer = nullptr;
 TTF_Font *Game::font = nullptr;
 
 Player *player = nullptr;
@@ -23,9 +23,11 @@ Player *player = nullptr;
 Game::Game() {};
 Game::~Game() {};
 
-void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
+void Game::init(const char *title, int xpos, int ypos, bool isFullscreen)
 {
   int flags = 0;
+
+  fullscreen = isFullscreen;
   if (fullscreen)
   {
     flags = SDL_WINDOW_FULLSCREEN;
@@ -69,10 +71,6 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
   }
 
   basePath = SDL_GetBasePath();
-
-  std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
-
-  player = new Player(playerPath.c_str(), 0, 720, true, 1);
 
   std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
   font = TTF_OpenFont(fontPath.c_str(), 72);
@@ -145,6 +143,21 @@ void Game::render()
 bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
 {
   return SDL_HasIntersection(&a, &b);
+}
+
+void Game::initGameEntites()
+{
+  std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
+  player = new Player(playerPath.c_str(), 0, 720, true, 1);
+}
+
+void Game::clearGameEntites()
+{
+  if (player)
+  {
+    delete player;
+    player = nullptr;
+  }
 }
 
 void Game::clean()

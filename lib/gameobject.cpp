@@ -23,6 +23,7 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, fl
   srcRect.x = srcRect.y = 0;
   srcRect.w = srcRect.h = gameObjectRes;
 
+  // naprawić skalowanie się
   dstRect.w = srcRect.w * scale;
   dstRect.h = srcRect.h * scale;
   dstRect.x = x;
@@ -38,7 +39,14 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, fl
   hitboxRect = dstRect;
 }
 
-GameObject::~GameObject() {}
+GameObject::~GameObject()
+{
+  if (texture)
+  {
+    SDL_DestroyTexture(texture);
+    texture = nullptr;
+  }
+}
 
 void GameObject::render()
 {

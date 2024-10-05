@@ -3,21 +3,17 @@
 #include "ui/button.h"
 
 Button *pausedBtn;
-Button *resumeBtn;
-Button *gearBtn;
 
 Pause::Pause()
 {
+  pausedBtn = new Button("text", 0, Game::fullscreen ? 162 * 1.5 : 162, "Paused", 6, true);
+  buttons["Resume"] = new Button("text", 0, Game::fullscreen ? 341 * 1.5 : 341, "Resume", 4, true);
+  buttons["Main menu"] = new Button("text", 0, Game::fullscreen ? 493 * 1.5 : 493, "Main menu", 4, true);
+
   std::string gearPath = std::string(Game::basePath) + "assets/images/gear.png";
-
-  pausedBtn = new Button("text", 0, 100, "Paused", 6, true);
-  resumeBtn = new Button("text", 0, 300, "Resume", 4, true);
-
-  gearBtn = new Button("image", Game::windowWidth - 64, Game::windowHeight - 64, gearPath.c_str(), false);
-
-  buttons.emplace("Resume", resumeBtn);
-  buttons.emplace("Gear", gearBtn);
+  buttons["Gear"] = new Button("image", Game::windowWidth - 64, Game::windowHeight - 64, gearPath.c_str(), false);
 }
+
 Pause::~Pause() {}
 
 void Pause::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &gameState)
@@ -30,16 +26,21 @@ void Pause::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &g
   {
     SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
 
-    SDL_Rect resumeRect = buttons["Resume"]->getDstRect();
-    SDL_Rect gearRect = buttons["Gear"]->getDstRect();
+    SDL_Rect resumeBtnRect = buttons["Resume"]->getDstRect();
+    SDL_Rect mainMenuBtnRect = buttons["Main menu"]->getDstRect();
+    SDL_Rect gearBtnRect = buttons["Gear"]->getDstRect();
 
-    if (SDL_PointInRect(&mousePosition, &resumeRect))
+    if (SDL_PointInRect(&mousePosition, &resumeBtnRect))
     {
       gameState = PLAY;
     }
-    else if (SDL_PointInRect(&mousePosition, &gearRect))
+    else if (SDL_PointInRect(&mousePosition, &mainMenuBtnRect))
     {
-      gearBtn->click();
+      gameState = MENU;
+    }
+    else if (SDL_PointInRect(&mousePosition, &gearBtnRect))
+    {
+      std::cout << "Settings" << std::endl;
     }
   }
 }
@@ -54,21 +55,11 @@ void Pause::render(TTF_Font *font)
 
   pausedBtn->render();
 
-  // if (SDL_PointInRect(&mousePosition, &resumeRect))
-  // {
-  //   SDL_Surface *resumeShadowSurface = TTF_RenderText_Solid(font, "Resume", GRAY);
-  //   SDL_Texture *resumeShadowTexture = SDL_CreateTextureFromSurface(Game::renderer, resumeShadowSurface);
-  //   SDL_Rect shadowRect = {resumeRect.x + 2, resumeRect.y + 2, resumeRect.w, resumeRect.h};
-  //   SDL_RenderCopy(Game::renderer, resumeShadowTexture, NULL, &shadowRect);
+  buttons["Resume"]->render(true);
 
-  //   SDL_FreeSurface(resumeShadowSurface);
-  //   SDL_DestroyTexture(resumeShadowTexture);
-  // }
+  buttons["Main menu"]->render(true);
 
-  for (const auto &buttonPair : buttons)
-  {
-    buttonPair.second->render();
-  }
+  buttons["Gear"]->render();
 
   SDL_SetRenderDrawColor(Game::renderer, 0, 0, 0, 255);
 }
