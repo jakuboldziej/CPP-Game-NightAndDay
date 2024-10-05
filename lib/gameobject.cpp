@@ -1,8 +1,10 @@
 #include "objects/gameobject.h"
 #include "utils/texturemanager.h"
 
-GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, int velocity)
-    : x(x), y(y), animated(animated), velocity(velocity)
+#include <utility>
+
+GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, float scale, int velocity)
+    : x(x), y(y - (gameObjectRes * scale)), animated(animated), scale(scale), velocity(velocity)
 {
   try
   {
@@ -19,10 +21,10 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, in
   }
 
   srcRect.x = srcRect.y = 0;
-  srcRect.w = srcRect.h = 128;
+  srcRect.w = srcRect.h = gameObjectRes;
 
-  dstRect.w = srcRect.w;
-  dstRect.h = srcRect.h;
+  dstRect.w = srcRect.w * scale;
+  dstRect.h = srcRect.h * scale;
   dstRect.x = x;
   dstRect.y = y;
 
@@ -32,6 +34,7 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, in
 
     animations.emplace("Idle", idle);
   }
+
   hitboxRect = dstRect;
 }
 
@@ -42,8 +45,8 @@ void GameObject::render()
   TextureManager::draw(texture, srcRect, dstRect, flip);
 
   // Hitbox
-  SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
-  SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+  // SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+  // SDL_RenderDrawRect(Game::renderer, &hitboxRect);
 }
 
 void GameObject::update()
@@ -53,7 +56,6 @@ void GameObject::update()
     int currentFrame = (SDL_GetTicks() / frameSpeed) % frames;
     srcRect.x = currentFrame * srcRect.w;
   }
-
   srcRect.y = animIndex * srcRect.h;
 
   dstRect.x = x;
@@ -106,7 +108,7 @@ void GameObject::printInfo(const char *name)
 {
   // std::cout << "|" << name << "| " << ": x: " << x << " y: " << y << std::endl;
   // std::cout << "|" << name << "| " << "srcRect - x: " << srcRect.x << " y: " << srcRect.y << " w: " << srcRect.w << " h: " << srcRect.h << std::endl;
-  std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << " animation: " << currentAnimation << std::endl;
+  std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << std::endl;
   // std::cout << "|" << name << "| " << animations.size() << std::endl;
   // std::cout << "|" << name << "| " << y << " " << srcRect.h << " " << Game::windowHeight << std::endl;
 }

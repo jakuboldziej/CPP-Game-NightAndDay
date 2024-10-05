@@ -38,6 +38,7 @@ public:
   static int windowHeight;
 
   static char *basePath;
+  static TTF_Font *font;
 
 private:
   bool isRunning = false;

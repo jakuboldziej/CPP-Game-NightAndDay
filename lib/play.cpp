@@ -44,5 +44,5 @@ void Play::update(Player *player)
     player->play("Idle");
 
   player->update();
-  player->printInfo("Player");
+  // player->printInfo("Player");
 }

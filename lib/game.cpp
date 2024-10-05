@@ -16,7 +16,7 @@ int Game::windowHeight = 0;
 SDL_Renderer *Game::renderer = nullptr;
 char *Game::basePath = nullptr;
 
-TTF_Font *font = nullptr;
+TTF_Font *Game::font = nullptr;
 
 Player *player = nullptr;
 
@@ -71,9 +71,8 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
   basePath = SDL_GetBasePath();
 
   std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
-  std::string arrowPath = std::string(basePath) + "assets/sprites/Samurai_Archer/Arrow.png";
 
-  player = new Player(playerPath.c_str(), 0, 720 - 128, true);
+  player = new Player(playerPath.c_str(), 0, 720, true, 1);
 
   std::string fontPath = std::string(basePath) + "assets/fonts/vgasyse.fon";
   font = TTF_OpenFont(fontPath.c_str(), 72);
@@ -129,7 +128,7 @@ void Game::render()
 
   if (gameState == MENU)
   {
-    menu->render(font);
+    menu->render();
   }
   else if (gameState == PLAY)
   {

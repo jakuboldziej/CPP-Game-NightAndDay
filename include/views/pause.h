@@ -3,6 +3,8 @@
 #include "game.h"
 #include <map>
 
+#include "ui/button.h"
+
 class Pause
 {
 public:
@@ -14,5 +16,5 @@ public:
 
 private:
   SDL_Texture *gearTexture;
-  std::map<std::string, SDL_Rect> buttons;
+  std::map<std::string, Button *> buttons;
 };

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <map>
-#include <utility>
 
 #include "game.h"
 #include "utils/animation.h"
@@ -10,7 +9,7 @@
 class GameObject
 {
 public:
-  GameObject(const char *textureSheet, int x, int y, bool animated = false, int velocity = 4);
+  GameObject(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 4);
 
   ~GameObject();
 
@@ -29,6 +28,7 @@ protected:
   int y;
   int velocity;
   bool animated = false;
+  int scale;
   int frames = 0;
   int frameSpeed = 100;
 

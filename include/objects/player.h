@@ -5,7 +5,7 @@
 class Player : public GameObject
 {
 public:
-  Player(const char *textureSheet, int x, int y, bool animated = false, int velocity = 5) : GameObject(textureSheet, x, y, animated, velocity)
+  Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5) : GameObject(textureSheet, x, y, animated, scale, velocity)
   {
     Animation idle = Animation(0, 6, 100);
     Animation walk = Animation(1, 9, 100);
@@ -41,6 +41,15 @@ public:
   void jump() { jumping = true; }
   bool isJumping() { return jumping; }
 
+  void render()
+  {
+    // Hitbox
+    SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+    SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+
+    GameObject::render();
+  }
+
   void update()
   {
     if (jumping)
@@ -48,6 +57,7 @@ public:
       yVelocity += gravity;
       y -= yVelocity;
 
+      // naprawić
       if (y <= Game::windowHeight - srcRect.h - jumpHeight)
       {
         jumping = false;
@@ -74,7 +84,8 @@ public:
 
   bool isOnGround()
   {
-    return y + srcRect.h >= Game::windowHeight;
+    // std::cout << y << " " << srcRect.h << " " << scale << " " << Game::windowHeight << std::endl;
+    return y + (srcRect.h * scale) >= Game::windowHeight;
   }
 
 private:
