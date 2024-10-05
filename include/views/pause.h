@@ -13,5 +13,6 @@ public:
   void render(TTF_Font *font);
 
 private:
+  SDL_Texture *gearTexture;
   std::map<std::string, SDL_Rect> buttons;
 };

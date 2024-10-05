@@ -1,4 +1,5 @@
 #include "game.h"
+
 #include "views/menu.h"
 #include "views/play.h"
 #include "views/pause.h"
@@ -6,24 +7,21 @@
 #include "objects/gameobject.h"
 #include "objects/player.h"
 
-Menu menu;
-Play play;
-Pause pause;
+Menu *menu;
+Play *play;
+Pause *pause;
 
 int Game::windowWidth = 0;
 int Game::windowHeight = 0;
 SDL_Renderer *Game::renderer = nullptr;
+char *Game::basePath = nullptr;
 
 TTF_Font *font = nullptr;
 
 Player *player = nullptr;
 
 Game::Game() {};
-Game::~Game()
-{
-  delete player;
-  clean();
-}
+Game::~Game() {};
 
 void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
 {
@@ -70,7 +68,7 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
     std::cout << "Renderer created!" << std::endl;
   }
 
-  char *basePath = SDL_GetBasePath();
+  basePath = SDL_GetBasePath();
 
   std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
   std::string arrowPath = std::string(basePath) + "assets/sprites/Samurai_Archer/Arrow.png";
@@ -84,11 +82,9 @@ void Game::init(const char *title, int xpos, int ypos, bool fullscreen)
     std::cerr << "Failed to load font: " << TTF_GetError() << std::endl;
   }
 
-  SDL_free(basePath);
-
-  menu = Menu();
-  play = Play();
-  pause = Pause();
+  menu = new Menu();
+  play = new Play();
+  pause = new Pause();
 
   isRunning = true;
   gameState = MENU;
@@ -102,15 +98,15 @@ void Game::handleEvents()
 
   if (gameState == MENU)
   {
-    menu.handleEvents(mousePosition, event, gameState, isRunning);
+    menu->handleEvents(mousePosition, event, gameState, isRunning);
   }
   else if (gameState == PLAY)
   {
-    play.handleEvents(event, gameState);
+    play->handleEvents(event, gameState);
   }
   else if (gameState == PAUSE)
   {
-    pause.handleEvents(mousePosition, event, gameState);
+    pause->handleEvents(mousePosition, event, gameState);
   }
 
   if (event.type == SDL_QUIT)
@@ -123,7 +119,7 @@ void Game::update()
 {
   if (gameState == PLAY)
   {
-    play.update(player);
+    play->update(player);
   }
 }
 
@@ -131,19 +127,17 @@ void Game::render()
 {
   SDL_RenderClear(renderer);
 
-  SDL_Color white = {255, 255, 255};
-
   if (gameState == MENU)
   {
-    menu.render(font);
+    menu->render(font);
   }
   else if (gameState == PLAY)
   {
-    play.render(player);
+    play->render(player);
   }
   else if (gameState == PAUSE)
   {
-    pause.render(font);
+    pause->render(font);
   }
 
   SDL_RenderPresent(renderer);

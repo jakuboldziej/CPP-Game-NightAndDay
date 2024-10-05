@@ -15,7 +15,7 @@ public:
     return tex;
   }
 
-  static void draw(SDL_Texture *texture, SDL_Rect srcRect, SDL_Rect dstRect, SDL_RendererFlip flip)
+  static void draw(SDL_Texture *texture, SDL_Rect srcRect, SDL_Rect dstRect, SDL_RendererFlip flip = SDL_FLIP_NONE)
   {
     SDL_RenderCopyEx(Game::renderer, texture, &srcRect, &dstRect, 0.0, NULL, flip);
   }
