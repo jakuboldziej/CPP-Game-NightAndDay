@@ -7,6 +7,8 @@ class Player : public GameObject
 public:
   Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5) : GameObject(textureSheet, x, y, animated, scale, velocity)
   {
+
+    std::cout << textureSheet << std::endl;
     Animation idle = Animation(0, 6, 100);
     Animation walk = Animation(1, 9, 100);
     Animation run = Animation(2, 8, 100);
@@ -29,13 +31,21 @@ public:
     animations.emplace("Hurt", hurt);
     animations.emplace("Death", death);
 
-    Hitbox idleHitbox = Hitbox(dstRect.w - 102, dstRect.h - 59, 47, 59);
-    Hitbox runHitbox = Hitbox(dstRect.w - 91, dstRect.h - 59, 52, 59);
+    Hitbox idleHitbox = Hitbox(102, 59, 47, 59);
+    Hitbox runHitbox = Hitbox(91, 59, 52, 59);
 
     hitboxSizes.emplace("Idle", idleHitbox);
     hitboxSizes.emplace("Run", runHitbox);
     hitboxSizes.emplace("Jump", idleHitbox);
-  };
+
+    for (auto &hitboxSize : hitboxSizes)
+    {
+      hitboxSize.second.offsetWidth *= scale;
+      hitboxSize.second.offsetHeight *= scale;
+      hitboxSize.second.offsetX *= scale;
+      hitboxSize.second.offsetY *= scale;
+    }
+  }
   ~Player() {}
 
   void jump() { jumping = true; }
@@ -44,21 +54,22 @@ public:
   void render()
   {
     // Hitbox
-    SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
-    SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+    // SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+    // SDL_RenderDrawRect(Game::renderer, &hitboxRect);
 
     GameObject::render();
   }
 
   void update()
   {
+    GameObject::update();
+
     if (jumping)
     {
       yVelocity += gravity;
       y -= yVelocity;
 
-      // naprawić
-      if (y <= Game::windowHeight - srcRect.h - jumpHeight)
+      if (hitboxRect.y <= Game::windowHeight - jumpHeight)
       {
         jumping = false;
         yVelocity = 0;
@@ -71,25 +82,16 @@ public:
 
     if (isOnGround())
     {
-      y = Game::windowHeight - srcRect.h;
       yVelocity = 0;
     }
     else
     {
       play("Jump");
     }
-
-    GameObject::update();
-  }
-
-  bool isOnGround()
-  {
-    // std::cout << y << " " << srcRect.h << " " << scale << " " << Game::windowHeight << std::endl;
-    return y + (srcRect.h * scale) >= Game::windowHeight;
   }
 
 private:
-  int jumpHeight = srcRect.h;
+  int jumpHeight = hitboxRect.h;
   bool jumping = false;
   float yVelocity = 0;
   const float gravity = 0.5f;

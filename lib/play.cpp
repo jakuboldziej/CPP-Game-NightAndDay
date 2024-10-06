@@ -11,38 +11,44 @@ void Play::handleEvents(SDL_Event event, GameState &gameState)
   }
 }
 
-void Play::render(Player *player)
+void Play::render(Player *player1, Player *player2)
 {
-  player->render();
+  player1->render();
+  // player2->render();
 
   SDL_SetRenderDrawColor(Game::renderer, 60, 60, 60, 255);
 }
 
-void Play::update(Player *player)
+void Play::update(Player *player1, Player *player2)
 {
   const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
   // Movement
-  if (state[SDL_SCANCODE_SPACE])
+  if (state[SDL_SCANCODE_W])
   {
-    if (player->isOnGround())
-      player->jump();
+    if (player1->isOnGround())
+      player1->jump();
   }
   if (state[SDL_SCANCODE_A])
   {
-    player->move(-1, 0);
-    player->play("Run");
-    player->flip = SDL_FLIP_HORIZONTAL;
+    player1->move(-1, 0);
+    player1->play("Run");
+    player1->flip = SDL_FLIP_HORIZONTAL;
   }
   else if (state[SDL_SCANCODE_D])
   {
-    player->move(1, 0);
-    player->play("Run");
-    player->flip = SDL_FLIP_NONE;
+    player1->move(1, 0);
+    player1->play("Run");
+    player1->flip = SDL_FLIP_NONE;
   }
-  else
-    player->play("Idle");
+  else if (player1->isOnGround())
+    player1->play("Idle");
 
-  player->update();
-  // player->printInfo("Player");
+  player1->update();
+
+  // player2->play("Idle");
+  // player2->update();
+
+  player1->printInfo("Player1");
+  // player2->printInfo("Player2");
 }

@@ -16,6 +16,7 @@ public:
   void render();
   void update();
   void move(int dx, int dy);
+  bool isOnGround();
   void play(const char *animName);
   SDL_Rect getHitbox() { return hitboxRect; }
 

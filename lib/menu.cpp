@@ -20,7 +20,11 @@ void Menu::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &ga
   if (event.type == SDL_KEYDOWN)
   {
     if (event.key.keysym.sym == SDLK_RETURN)
+    {
+      Game::clearGameEntites();
+      Game::initGameEntites();
       gameState = PLAY;
+    }
   }
   else if (event.type == SDL_MOUSEBUTTONDOWN)
   {

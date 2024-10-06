@@ -18,7 +18,8 @@ bool Game::fullscreen;
 SDL_Renderer *Game::renderer = nullptr;
 TTF_Font *Game::font = nullptr;
 
-Player *player = nullptr;
+Player *player1 = nullptr;
+Player *player2 = nullptr;
 
 Game::Game() {};
 Game::~Game() {};
@@ -116,7 +117,7 @@ void Game::update()
 {
   if (gameState == PLAY)
   {
-    play->update(player);
+    play->update(player1, player2);
   }
 }
 
@@ -130,7 +131,7 @@ void Game::render()
   }
   else if (gameState == PLAY)
   {
-    play->render(player);
+    play->render(player1, player2);
   }
   else if (gameState == PAUSE)
   {
@@ -147,16 +148,25 @@ bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
 
 void Game::initGameEntites()
 {
-  std::string playerPath = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
-  player = new Player(playerPath.c_str(), 0, 720, true, 1);
+  std::string player1Path = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
+  player1 = new Player(player1Path.c_str(), 0, Game::windowHeight, true, 2);
+
+  std::string player2Path = std::string(basePath) + "assets/sprites/Samurai_Commander/Samurai_Commander_Spritelist.png";
+  player2 = new Player(player2Path.c_str(), Game::windowWidth - 128 * 2, Game::windowHeight, true, 2);
 }
 
 void Game::clearGameEntites()
 {
-  if (player)
+  if (player1)
   {
-    delete player;
-    player = nullptr;
+    delete player1;
+    player1 = nullptr;
+  }
+
+  if (player2)
+  {
+    delete player2;
+    player2 = nullptr;
   }
 }
 

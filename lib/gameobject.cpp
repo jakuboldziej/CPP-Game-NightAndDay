@@ -4,7 +4,7 @@
 #include <utility>
 
 GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, float scale, int velocity)
-    : x(x), y(y - (gameObjectRes * scale)), animated(animated), scale(scale), velocity(velocity)
+    : x(x), y(y), animated(animated), scale(scale), velocity(velocity)
 {
   try
   {
@@ -23,7 +23,6 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, fl
   srcRect.x = srcRect.y = 0;
   srcRect.w = srcRect.h = gameObjectRes;
 
-  // naprawić skalowanie się
   dstRect.w = srcRect.w * scale;
   dstRect.h = srcRect.h * scale;
   dstRect.x = x;
@@ -34,6 +33,12 @@ GameObject::GameObject(const char *textureSheet, int x, int y, bool animated, fl
     Animation idle = Animation(0, 6, 100);
 
     animations.emplace("Idle", idle);
+
+    Hitbox idleHitbox = Hitbox(102, 59, 47, 59);
+
+    hitboxSizes.emplace("Idle", idleHitbox);
+
+    play("Idle");
   }
 
   hitboxRect = dstRect;
@@ -53,8 +58,8 @@ void GameObject::render()
   TextureManager::draw(texture, srcRect, dstRect, flip);
 
   // Hitbox
-  // SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
-  // SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+  SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
+  SDL_RenderDrawRect(Game::renderer, &hitboxRect);
 }
 
 void GameObject::update()
@@ -66,17 +71,22 @@ void GameObject::update()
   }
   srcRect.y = animIndex * srcRect.h;
 
+  if (y + dstRect.h > Game::windowHeight)
+  {
+    y = Game::windowHeight - dstRect.h;
+  }
+
   dstRect.x = x;
   dstRect.y = y;
 
   if (animated)
   {
+    hitboxRect.w = dstRect.w - hitboxSizes[currentAnimation].offsetWidth;
+    hitboxRect.h = dstRect.h - hitboxSizes[currentAnimation].offsetHeight;
     hitboxRect.y = dstRect.y + hitboxSizes[currentAnimation].offsetY;
-    hitboxRect.w = hitboxSizes[currentAnimation].width;
-    hitboxRect.h = hitboxSizes[currentAnimation].height;
 
     if (flip == SDL_FLIP_HORIZONTAL)
-      hitboxRect.x = dstRect.x + dstRect.w - hitboxSizes[currentAnimation].width - hitboxSizes[currentAnimation].offsetX;
+      hitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - hitboxSizes[currentAnimation].offsetWidth) - hitboxSizes[currentAnimation].offsetX;
     else
       hitboxRect.x = dstRect.x + hitboxSizes[currentAnimation].offsetX;
   }
@@ -92,7 +102,11 @@ void GameObject::move(int dx, int dy)
     dx = 0;
 
   x += dx * velocity;
-  y += dy * velocity;
+}
+
+bool GameObject::isOnGround()
+{
+  return y + dstRect.h == Game::windowHeight;
 }
 
 void GameObject::play(const char *animName)
@@ -105,6 +119,7 @@ void GameObject::play(const char *animName)
     frameSpeed = anim.speed;
 
     currentAnimation = animName;
+    std::cout << currentAnimation << std::endl;
   }
   else
   {
@@ -114,9 +129,10 @@ void GameObject::play(const char *animName)
 
 void GameObject::printInfo(const char *name)
 {
-  // std::cout << "|" << name << "| " << ": x: " << x << " y: " << y << std::endl;
+  // std::cout << "|" << name << "| " << "x: " << x << " y: " << y << std::endl;
   // std::cout << "|" << name << "| " << "srcRect - x: " << srcRect.x << " y: " << srcRect.y << " w: " << srcRect.w << " h: " << srcRect.h << std::endl;
-  std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << std::endl;
-  // std::cout << "|" << name << "| " << animations.size() << std::endl;
-  // std::cout << "|" << name << "| " << y << " " << srcRect.h << " " << Game::windowHeight << std::endl;
+  // std::cout << "|" << name << "| " << "dstRect - x: " << dstRect.x << " y: " << dstRect.y << " w: " << dstRect.w << " h: " << dstRect.h << std::endl;
+  // std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << std::endl;
+  // std::cout << "|" << name << "| " << isOnGround() << std::endl;
+  // std::cout << "|" << name << "| " << "windowWidth: " << Game::windowWidth << " windowHeight: " << Game::windowHeight << std::endl;
 }

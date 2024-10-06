@@ -2,16 +2,16 @@
 
 struct Hitbox
 {
-  int width;
-  int height;
+  int offsetWidth;
+  int offsetHeight;
   int offsetX;
   int offsetY;
 
   Hitbox() {}
   Hitbox(int w, int h, int oX, int oY)
   {
-    width = w;
-    height = h;
+    offsetWidth = w;
+    offsetHeight = h;
     offsetX = oX;
     offsetY = oY;
   }
