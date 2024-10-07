@@ -32,15 +32,22 @@ void Play::update(Player *player1, Player *player2)
   if (state[SDL_SCANCODE_A])
   {
     player1->move(-1, 0);
-    player1->play("Run");
+    if (player1->isOnGround())
+      player1->play("Run");
     player1->flip = SDL_FLIP_HORIZONTAL;
   }
   else if (state[SDL_SCANCODE_D])
   {
     player1->move(1, 0);
-    player1->play("Run");
+    if (player1->isOnGround())
+      player1->play("Run");
     player1->flip = SDL_FLIP_NONE;
   }
+  else if (state[SDL_SCANCODE_X])
+  {
+    player1->attack("swingBackhand");
+  }
+  // Idle
   else if (player1->isOnGround())
     player1->play("Idle");
 

@@ -7,8 +7,7 @@ class Player : public GameObject
 public:
   Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5) : GameObject(textureSheet, x, y, animated, scale, velocity)
   {
-
-    std::cout << textureSheet << std::endl;
+    // std::cout << textureSheet << std::endl;
     Animation idle = Animation(0, 6, 100);
     Animation walk = Animation(1, 9, 100);
     Animation run = Animation(2, 8, 100);
@@ -64,6 +63,7 @@ public:
   {
     GameObject::update();
 
+    // movement
     if (jumping)
     {
       yVelocity += gravity;
@@ -88,11 +88,27 @@ public:
     {
       play("Jump");
     }
+
+    // attacking
+    if (attacking)
+    {
+    }
+  }
+
+  void attack(const char *attackType)
+  {
+    attacking = true;
+    if (strcmp(attackType, "swingBackhand") == 0)
+    {
+      play("SwingBackhand");
+    }
   }
 
 private:
-  int jumpHeight = hitboxRect.h;
+  int jumpHeight = hitboxRect.h * 1.2;
   bool jumping = false;
+  bool attacking = false;
+  const char *attackType = "";
   float yVelocity = 0;
   const float gravity = 0.5f;
 

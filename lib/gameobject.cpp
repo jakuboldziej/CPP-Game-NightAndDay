@@ -66,7 +66,9 @@ void GameObject::update()
 {
   if (animated)
   {
-    int currentFrame = (SDL_GetTicks() / frameSpeed) % frames;
+    unsigned int timeElapsed = SDL_GetTicks() - startTime;
+    int currentFrame = (timeElapsed / frameSpeed) % frames;
+
     srcRect.x = currentFrame * srcRect.w;
   }
   srcRect.y = animIndex * srcRect.h;
@@ -113,13 +115,18 @@ void GameObject::play(const char *animName)
 {
   if (animations.find(animName) != animations.end())
   {
+    if (currentAnimation != animName)
+    {
+      animIndex = animations[animName].index;
+      srcRect.x = 0;
+      startTime = SDL_GetTicks();
+    }
+
     Animation anim = animations[animName];
-    animIndex = anim.index;
     frames = anim.frames;
     frameSpeed = anim.speed;
 
     currentAnimation = animName;
-    std::cout << currentAnimation << std::endl;
   }
   else
   {

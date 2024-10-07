@@ -32,6 +32,7 @@ protected:
   int scale;
   int frames = 0;
   int frameSpeed = 100;
+  unsigned int startTime;
 
   SDL_Texture *texture;
   SDL_Rect srcRect, dstRect, hitboxRect;

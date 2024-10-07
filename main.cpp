@@ -6,7 +6,6 @@ Game *game;
 
 int main()
 {
-
   Uint32 frameStart;
   int frameTime;
 

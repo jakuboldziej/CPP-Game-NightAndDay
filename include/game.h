@@ -50,6 +50,7 @@ public:
 
 private:
   bool isRunning = false;
+
   SDL_Window *window;
   GameState gameState;
 };
