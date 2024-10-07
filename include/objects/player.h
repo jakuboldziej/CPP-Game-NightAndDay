@@ -37,6 +37,16 @@ public:
     hitboxSizes.emplace("Run", runHitbox);
     hitboxSizes.emplace("Jump", idleHitbox);
 
+    Hitbox swingBackhandHitbox = Hitbox(86, 59, 47, 59);
+    Hitbox swingDiagonalHitbox = Hitbox(80, 59, 32, 59);
+
+    // dodać osobne hitboxy dla ataków i blokowania
+    hitboxSizes.emplace("SwingBackhand", swingBackhandHitbox);
+    hitboxSizes.emplace("SwingForehand", swingBackhandHitbox);
+    hitboxSizes.emplace("SwingDiagonal", swingDiagonalHitbox);
+
+    hitboxSizes.emplace("Block", idleHitbox);
+
     for (auto &hitboxSize : hitboxSizes)
     {
       hitboxSize.second.offsetWidth *= scale;
@@ -50,6 +60,25 @@ public:
   void jump() { jumping = true; }
   bool isJumping() { return jumping; }
 
+  void attack(const char *pAttackType)
+  {
+    attackType = pAttackType;
+    play(attackType);
+    startTime = SDL_GetTicks();
+    attacking = true;
+  }
+  bool isAttacking() { return attacking; }
+
+  void block()
+  {
+    // play("Block");
+    // startTime = SDL_GetTicks();
+    // blocking = true;
+  }
+  bool isBlocking() { return blocking; }
+
+  bool canMove() { return !attacking && !blocking; }
+
   void render()
   {
     // Hitbox
@@ -61,9 +90,67 @@ public:
 
   void update()
   {
-    GameObject::update();
+    std::cout << blocking << std::endl;
 
-    // movement
+    if (blocking)
+    {
+      // handleBlocking();
+    }
+    else if (attacking)
+    {
+      handleAttacking();
+    }
+    else
+    {
+      GameObject::update();
+
+      handleMovement();
+    }
+  }
+
+private:
+  bool attacking = false;
+  const char *attackType = "";
+  bool blocking = false;
+
+  bool jumping = false;
+  int jumpHeight = hitboxRect.h * 1.2;
+  float yVelocity = 0;
+  const float gravity = 0.5f;
+
+  void applyGravity()
+  {
+    if (!isOnGround())
+    {
+      yVelocity += gravity;
+      y += yVelocity;
+    }
+  }
+
+  void handleBlocking()
+  {
+    }
+
+  void handleAttacking()
+  {
+    unsigned int timeElapsed = SDL_GetTicks() - startTime;
+    int totalFrames = animations[attackType].frames;
+    int animationDuration = totalFrames * animations[attackType].speed;
+
+    if (timeElapsed >= animationDuration)
+    {
+      attacking = false;
+    }
+    else
+    {
+      int currentFrame = (timeElapsed / animations[attackType].speed) % totalFrames;
+
+      GameObject::update();
+    }
+  }
+
+  void handleMovement()
+  {
     if (jumping)
     {
       yVelocity += gravity;
@@ -76,48 +163,11 @@ public:
       }
     }
     else
-    {
       applyGravity();
-    }
 
     if (isOnGround())
-    {
       yVelocity = 0;
-    }
     else
-    {
       play("Jump");
-    }
-
-    // attacking
-    if (attacking)
-    {
-    }
-  }
-
-  void attack(const char *attackType)
-  {
-    attacking = true;
-    if (strcmp(attackType, "swingBackhand") == 0)
-    {
-      play("SwingBackhand");
-    }
-  }
-
-private:
-  int jumpHeight = hitboxRect.h * 1.2;
-  bool jumping = false;
-  bool attacking = false;
-  const char *attackType = "";
-  float yVelocity = 0;
-  const float gravity = 0.5f;
-
-  void applyGravity()
-  {
-    if (!isOnGround())
-    {
-      yVelocity += gravity;
-      y += yVelocity;
-    }
   }
 };

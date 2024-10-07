@@ -69,9 +69,9 @@ void GameObject::update()
     unsigned int timeElapsed = SDL_GetTicks() - startTime;
     int currentFrame = (timeElapsed / frameSpeed) % frames;
 
+    srcRect.y = animIndex * srcRect.h;
     srcRect.x = currentFrame * srcRect.w;
   }
-  srcRect.y = animIndex * srcRect.h;
 
   if (y + dstRect.h > Game::windowHeight)
   {
@@ -96,11 +96,22 @@ void GameObject::update()
   {
     hitboxRect = dstRect;
   }
+
+  if (hitboxRect.x < 0)
+  {
+    x += (0 - hitboxRect.x);
+    hitboxRect.x = 0;
+  }
+  else if (hitboxRect.x + hitboxRect.w >= Game::windowWidth)
+  {
+    x -= (hitboxRect.x + hitboxRect.w - Game::windowWidth);
+    hitboxRect.x = Game::windowWidth - hitboxRect.w;
+  }
 }
 
 void GameObject::move(int dx, int dy)
 {
-  if (hitboxRect.x + dx * velocity < 0 || hitboxRect.x + dx * velocity + hitboxRect.w >= Game::windowWidth)
+  if (hitboxRect.x + dx * velocity < 0 || hitboxRect.x + dx * velocity + hitboxRect.w > Game::windowWidth)
     dx = 0;
 
   x += dx * velocity;
@@ -141,5 +152,6 @@ void GameObject::printInfo(const char *name)
   // std::cout << "|" << name << "| " << "dstRect - x: " << dstRect.x << " y: " << dstRect.y << " w: " << dstRect.w << " h: " << dstRect.h << std::endl;
   // std::cout << "|" << name << "| " << "hitboxRect - x: " << hitboxRect.x << " y: " << hitboxRect.y << " w: " << hitboxRect.w << " h: " << hitboxRect.h << std::endl;
   // std::cout << "|" << name << "| " << isOnGround() << std::endl;
+  // std::cout << "|" << name << "| " << "currentAnimation: " << currentAnimation << std::endl;
   // std::cout << "|" << name << "| " << "windowWidth: " << Game::windowWidth << " windowHeight: " << Game::windowHeight << std::endl;
 }

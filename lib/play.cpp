@@ -24,32 +24,52 @@ void Play::update(Player *player1, Player *player2)
   const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
   // Movement
-  if (state[SDL_SCANCODE_W])
+  if (player1->canMove())
   {
-    if (player1->isOnGround())
-      player1->jump();
+    if (state[SDL_SCANCODE_W])
+    {
+      if (player1->isOnGround())
+        player1->jump();
+    }
+    if (state[SDL_SCANCODE_A])
+    {
+      player1->move(-1, 0);
+      if (player1->isOnGround())
+        player1->play("Run");
+      player1->flip = SDL_FLIP_HORIZONTAL;
+    }
+    else if (state[SDL_SCANCODE_D])
+    {
+      player1->move(1, 0);
+      if (player1->isOnGround())
+        player1->play("Run");
+      player1->flip = SDL_FLIP_NONE;
+    }
+    else if (player1->isOnGround())
+      player1->play("Idle");
   }
-  if (state[SDL_SCANCODE_A])
+
+  // attacking
+  if (state[SDL_SCANCODE_X])
   {
-    player1->move(-1, 0);
-    if (player1->isOnGround())
-      player1->play("Run");
-    player1->flip = SDL_FLIP_HORIZONTAL;
+    if (!player1->isAttacking())
+      player1->attack("SwingBackhand");
   }
-  else if (state[SDL_SCANCODE_D])
+  else if (state[SDL_SCANCODE_C])
   {
-    player1->move(1, 0);
-    if (player1->isOnGround())
-      player1->play("Run");
-    player1->flip = SDL_FLIP_NONE;
+    if (!player1->isAttacking())
+      player1->attack("SwingForehand");
   }
-  else if (state[SDL_SCANCODE_X])
+  else if (state[SDL_SCANCODE_V])
   {
-    player1->attack("swingBackhand");
+    if (!player1->isAttacking())
+      player1->attack("SwingDiagonal");
   }
-  // Idle
-  else if (player1->isOnGround())
-    player1->play("Idle");
+  else if (state[SDL_SCANCODE_B])
+  {
+    if (!player1->isBlocking())
+      player1->block();
+  }
 
   player1->update();
 
