@@ -71,11 +71,16 @@ public:
 
   void block()
   {
-    // play("Block");
-    // startTime = SDL_GetTicks();
-    // blocking = true;
+    play("Block");
+    startTime = SDL_GetTicks();
+    blocking = true;
   }
   bool isBlocking() { return blocking; }
+  void stopBlocking()
+  {
+
+    blocking = false;
+  }
 
   bool canMove() { return !attacking && !blocking; }
 
@@ -90,11 +95,9 @@ public:
 
   void update()
   {
-    std::cout << blocking << std::endl;
-
     if (blocking)
     {
-      // handleBlocking();
+      handleBlocking();
     }
     else if (attacking)
     {
@@ -129,7 +132,8 @@ private:
 
   void handleBlocking()
   {
-    }
+    GameObject::update();
+  }
 
   void handleAttacking()
   {
