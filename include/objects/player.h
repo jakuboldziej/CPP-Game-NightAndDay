@@ -7,6 +7,13 @@ class Player : public GameObject
 public:
   Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5) : GameObject(textureSheet, x, y, animated, scale, velocity)
   {
+    maxHealth = 100;
+    currentHealth = maxHealth;
+
+    attackHitboxRect = {0, 0, 0, 0};
+
+    // Animations
+
     // std::cout << textureSheet << std::endl;
     Animation idle = Animation(0, 6, 100);
     Animation walk = Animation(1, 9, 100);
@@ -30,12 +37,16 @@ public:
     animations.emplace("Hurt", hurt);
     animations.emplace("Death", death);
 
+    // Movement hitboxes
+
     Hitbox idleHitbox = Hitbox(102, 59, 47, 59);
     Hitbox runHitbox = Hitbox(91, 59, 52, 59);
 
     hitboxSizes.emplace("Idle", idleHitbox);
     hitboxSizes.emplace("Run", runHitbox);
     hitboxSizes.emplace("Jump", idleHitbox);
+
+    // Attacking hitboxes
 
     Hitbox swingBackhandHitbox = Hitbox(86, 59, 47, 59);
     Hitbox swingDiagonalHitbox = Hitbox(80, 59, 32, 59);
@@ -46,6 +57,11 @@ public:
     hitboxSizes.emplace("SwingDiagonal", swingDiagonalHitbox);
 
     hitboxSizes.emplace("Block", idleHitbox);
+
+    swingBackhandHitboxes[0] = Hitbox(120, 100, 30, 10);
+    swingBackhandHitboxes[1] = Hitbox(140, 100, 40, 10);
+    swingBackhandHitboxes[2] = Hitbox(160, 100, 50, 10);
+    swingBackhandHitboxes[3] = Hitbox(160, 100, 50, 10);
 
     for (auto &hitboxSize : hitboxSizes)
     {
@@ -82,6 +98,18 @@ public:
     blocking = false;
   }
 
+  void takeDamage(int damage)
+  {
+    currentHealth -= damage;
+    if (currentHealth < 0)
+    {
+      currentHealth = 0;
+    }
+  }
+
+  int getCurrentHealth() { return currentHealth; }
+  int getMaxHealth() { return maxHealth; }
+
   bool canMove() { return !attacking && !blocking; }
 
   void render()
@@ -89,6 +117,10 @@ public:
     // Hitbox
     // SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
     // SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+
+    // Attack hitbox
+    SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
+    SDL_RenderDrawRect(Game::renderer, &attackHitboxRect);
 
     GameObject::render();
   }
@@ -116,10 +148,16 @@ private:
   const char *attackType = "";
   bool blocking = false;
 
+  SDL_Rect attackHitboxRect;
+  std::map<int, Hitbox> swingBackhandHitboxes;
+
   bool jumping = false;
   int jumpHeight = hitboxRect.h * 1.2;
   float yVelocity = 0;
   const float gravity = 0.5f;
+
+  int maxHealth;
+  int currentHealth;
 
   void applyGravity()
   {
@@ -143,11 +181,24 @@ private:
 
     if (timeElapsed >= animationDuration)
     {
+      attackHitboxRect = {0, 0, 0, 0};
       attacking = false;
     }
     else
     {
       int currentFrame = (timeElapsed / animations[attackType].speed) % totalFrames;
+
+      if (strcmp(attackType, "SwingBackhand") == 0)
+      {
+        attackHitboxRect.w = dstRect.w - swingBackhandHitboxes[currentFrame].offsetWidth;
+        attackHitboxRect.h = dstRect.h - swingBackhandHitboxes[currentFrame].offsetHeight;
+        attackHitboxRect.y = dstRect.y + swingBackhandHitboxes[currentFrame].offsetY;
+
+        if (flip == SDL_FLIP_HORIZONTAL)
+          attackHitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - swingBackhandHitboxes[currentFrame].offsetWidth) - swingBackhandHitboxes[currentFrame].offsetX;
+        else
+          attackHitboxRect.x = dstRect.x + swingBackhandHitboxes[currentFrame].offsetX;
+      }
 
       GameObject::update();
     }
