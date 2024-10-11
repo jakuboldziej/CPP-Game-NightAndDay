@@ -58,10 +58,10 @@ public:
 
     hitboxSizes.emplace("Block", idleHitbox);
 
-    swingBackhandHitboxes[0] = Hitbox(120, 100, 30, 10);
-    swingBackhandHitboxes[1] = Hitbox(140, 100, 40, 10);
-    swingBackhandHitboxes[2] = Hitbox(160, 100, 50, 10);
-    swingBackhandHitboxes[3] = Hitbox(160, 100, 50, 10);
+    attackHitboxMap["SwingBackhand"][0] = Hitbox(0, 0, 0, 0);
+    attackHitboxMap["SwingBackhand"][1] = Hitbox(128, 128, 0, 0);
+    attackHitboxMap["SwingBackhand"][2] = Hitbox(94, 105, 94, 71);
+    attackHitboxMap["SwingBackhand"][3] = Hitbox(94, 105, 94, 71);
 
     for (auto &hitboxSize : hitboxSizes)
     {
@@ -69,6 +69,17 @@ public:
       hitboxSize.second.offsetHeight *= scale;
       hitboxSize.second.offsetX *= scale;
       hitboxSize.second.offsetY *= scale;
+    }
+
+    for (auto &attackType : attackHitboxMap)
+    {
+      for (auto &frameHitbox : attackType.second)
+      {
+        frameHitbox.second.offsetWidth *= scale;
+        frameHitbox.second.offsetHeight *= scale;
+        frameHitbox.second.offsetX *= scale;
+        frameHitbox.second.offsetY *= scale;
+      }
     }
   }
   ~Player() {}
@@ -114,6 +125,8 @@ public:
 
   void render()
   {
+    GameObject::render();
+
     // Hitbox
     // SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
     // SDL_RenderDrawRect(Game::renderer, &hitboxRect);
@@ -121,8 +134,6 @@ public:
     // Attack hitbox
     SDL_SetRenderDrawColor(Game::renderer, 0, 0, 255, 255);
     SDL_RenderDrawRect(Game::renderer, &attackHitboxRect);
-
-    GameObject::render();
   }
 
   void update()
@@ -143,13 +154,35 @@ public:
     }
   }
 
+  void move(int dx, int dy, Player *otherPlayer)
+  {
+    SDL_Rect newHitbox = hitboxRect;
+    newHitbox.x += dx * velocity;
+    newHitbox.y += dy * velocity;
+
+    if (newHitbox.x < 0 || newHitbox.x + newHitbox.w > Game::windowWidth)
+      dx = 0;
+
+    if (newHitbox.y < 0 || newHitbox.y + newHitbox.h > Game::windowHeight)
+      dy = 0;
+
+    if (Game::checkCollision(newHitbox, otherPlayer->hitboxRect))
+    {
+      dx = 0;
+      dy = 0;
+    }
+
+    x += dx * velocity;
+    y += dy * velocity;
+  }
+
 private:
   bool attacking = false;
   const char *attackType = "";
   bool blocking = false;
 
   SDL_Rect attackHitboxRect;
-  std::map<int, Hitbox> swingBackhandHitboxes;
+  std::map<std::string, std::map<int, Hitbox>> attackHitboxMap;
 
   bool jumping = false;
   int jumpHeight = hitboxRect.h * 1.2;
@@ -188,16 +221,18 @@ private:
     {
       int currentFrame = (timeElapsed / animations[attackType].speed) % totalFrames;
 
-      if (strcmp(attackType, "SwingBackhand") == 0)
+      if (strcmp(attackType, "SwingBackhand") == 0 && attackHitboxMap[attackType][currentFrame].offsetX != 0)
       {
-        attackHitboxRect.w = dstRect.w - swingBackhandHitboxes[currentFrame].offsetWidth;
-        attackHitboxRect.h = dstRect.h - swingBackhandHitboxes[currentFrame].offsetHeight;
-        attackHitboxRect.y = dstRect.y + swingBackhandHitboxes[currentFrame].offsetY;
+        attackHitboxRect.w = dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth;
+        attackHitboxRect.h = dstRect.h - attackHitboxMap[attackType][currentFrame].offsetHeight;
+        attackHitboxRect.y = dstRect.y + attackHitboxMap[attackType][currentFrame].offsetY;
 
         if (flip == SDL_FLIP_HORIZONTAL)
-          attackHitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - swingBackhandHitboxes[currentFrame].offsetWidth) - swingBackhandHitboxes[currentFrame].offsetX;
+          attackHitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth) - attackHitboxMap[attackType][currentFrame].offsetX;
         else
-          attackHitboxRect.x = dstRect.x + swingBackhandHitboxes[currentFrame].offsetX;
+        {
+          attackHitboxRect.x = dstRect.x + attackHitboxMap[attackType][currentFrame].offsetX;
+        }
       }
 
       GameObject::update();
