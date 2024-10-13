@@ -60,17 +60,15 @@ void Play::update(Player *player1, Player *player2)
     if (state[SDL_SCANCODE_W])
     {
       if (player1->isOnGround())
-      {
-        player1->takeDamage(20);
-
         player1->jump();
-      }
     }
     if (state[SDL_SCANCODE_A])
     {
       player1->move(-1, 0, player2);
+
       if (player1->isOnGround())
         player1->play("Run");
+
       player1->flip = SDL_FLIP_HORIZONTAL;
     }
     else if (state[SDL_SCANCODE_D])
@@ -122,9 +120,21 @@ void Play::update(Player *player1, Player *player2)
   }
 
   player1->update();
+  player1->printInfo("Player1");
+
+  // Player 2
 
   player2->update();
 
-  player1->printInfo("Player1");
   // player2->printInfo("Player2");
+
+  // Collision detection
+  if (player1->isAttacking() && !player1->attackHit)
+  {
+    if (Game::checkCollision(player1->getAttackingHitboxes(), player2->getHitbox()))
+    {
+      player2->takeDamage(20);
+      player1->attackHit = true;
+    }
+  }
 }

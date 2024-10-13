@@ -87,6 +87,7 @@ public:
   void jump() { jumping = true; }
   bool isJumping() { return jumping; }
 
+  bool attackHit = false;
   void attack(const char *pAttackType)
   {
     attackType = pAttackType;
@@ -95,6 +96,7 @@ public:
     attacking = true;
   }
   bool isAttacking() { return attacking; }
+  SDL_Rect getAttackingHitboxes() { return attackHitboxRect; }
 
   void block()
   {
@@ -216,6 +218,7 @@ private:
     {
       attackHitboxRect = {0, 0, 0, 0};
       attacking = false;
+      attackHit = false;
     }
     else
     {
