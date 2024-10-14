@@ -60,6 +60,7 @@ void GameObject::render()
   // Hitbox
   SDL_SetRenderDrawColor(Game::renderer, 255, 0, 0, 255);
   SDL_RenderDrawRect(Game::renderer, &hitboxRect);
+  // SDL_RenderDrawRect(Game::renderer, &dstRect);
 }
 
 void GameObject::update()
@@ -73,9 +74,9 @@ void GameObject::update()
     srcRect.x = currentFrame * srcRect.w;
   }
 
-  if (y + dstRect.h > Game::windowHeight)
+  if (y + hitboxRect.h > Game::windowHeight)
   {
-    y = Game::windowHeight - dstRect.h;
+    y = Game::windowHeight - hitboxRect.h;
   }
 
   dstRect.x = x;

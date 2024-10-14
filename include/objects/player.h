@@ -5,7 +5,8 @@
 class Player : public GameObject
 {
 public:
-  Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5) : GameObject(textureSheet, x, y, animated, scale, velocity)
+  Player(const char *textureSheet, int x, int y, bool animated = false, float scale = 1, int velocity = 5, SDL_RendererFlip flip = SDL_FLIP_NONE)
+      : GameObject(textureSheet, x, y, animated, scale, velocity)
   {
     maxHealth = 100;
     currentHealth = maxHealth;

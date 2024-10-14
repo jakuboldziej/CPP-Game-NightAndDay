@@ -1,6 +1,12 @@
 #include "views/play.h"
 
-Play::Play() {}
+Button *winnerText;
+
+Play::Play()
+{
+  buttons["Rematch"] = new Button("text", 0, Game::fullscreen ? 341 * 1.5 : 341, "Rematch", 5, true);
+  buttons["Quit"] = new Button("text", 0, Game::fullscreen ? 493 * 1.5 : 493, "Quit", 5, true);
+}
 Play::~Play() {}
 
 void Play::handleEvents(SDL_Event event, GameState &gameState)
@@ -13,6 +19,13 @@ void Play::handleEvents(SDL_Event event, GameState &gameState)
 
 void Play::render(Player *player1, Player *player2)
 {
+  if (gameEnded == true)
+  {
+    winnerText->render();
+    buttons["Rematch"]->render(true);
+    buttons["Quit"]->render(true);
+  }
+
   player1->render();
   player2->render();
 
@@ -50,6 +63,22 @@ void Play::render(Player *player1, Player *player2)
 
 void Play::update(Player *player1, Player *player2)
 {
+  // Handle game end
+  if (gameEnded == true)
+    return;
+
+  if (player1->getCurrentHealth() <= 0)
+  {
+    initGameEnd("Player 2");
+    return;
+  }
+  else if (player2->getCurrentHealth() <= 0)
+  {
+    initGameEnd("Player 1");
+    return;
+  }
+
+  // *przenieść keyboard inputy do klasy Player?*
   const Uint8 *state = SDL_GetKeyboardState(nullptr);
 
   // Player 1
@@ -82,7 +111,7 @@ void Play::update(Player *player1, Player *player2)
       player1->play("Idle");
   }
 
-  // attacking
+  // Attacking
   if (state[SDL_SCANCODE_X])
   {
     if (!player1->isAttacking())
@@ -98,14 +127,9 @@ void Play::update(Player *player1, Player *player2)
     if (!player1->isAttacking())
       player1->attack("SwingDiagonal");
   }
-  else if (state[SDL_SCANCODE_B])
-  {
-    if (!player1->isBlocking())
-      player1->block();
-  }
 
   // Blocking
-  if (state[SDL_SCANCODE_B])
+  if (state[SDL_SCANCODE_B] && !player1->isAttacking() && !player1->isJumping())
   {
     if (!player1->isBlocking())
       player1->block();
@@ -114,7 +138,6 @@ void Play::update(Player *player1, Player *player2)
   {
     if (player1->isBlocking())
     {
-      std::cout << "Stop blocking" << std::endl;
       player1->stopBlocking();
     }
   }
@@ -124,8 +147,65 @@ void Play::update(Player *player1, Player *player2)
 
   // Player 2
 
-  player2->update();
+  if (player2->canMove())
+  {
+    if (state[SDL_SCANCODE_I])
+    {
+      if (player2->isOnGround())
+        player2->jump();
+    }
+    if (state[SDL_SCANCODE_J])
+    {
+      player2->move(-1, 0, player1);
 
+      if (player2->isOnGround())
+        player2->play("Run");
+
+      player2->flip = SDL_FLIP_HORIZONTAL;
+    }
+    else if (state[SDL_SCANCODE_L])
+    {
+      player2->move(1, 0, player1);
+      if (player2->isOnGround())
+        player2->play("Run");
+      player2->flip = SDL_FLIP_NONE;
+    }
+    else if (player2->isOnGround())
+      player2->play("Idle");
+  }
+
+  // Attacking
+  if (state[SDL_SCANCODE_M])
+  {
+    if (!player2->isAttacking())
+      player2->attack("SwingBackhand");
+  }
+  else if (state[SDL_SCANCODE_COMMA])
+  {
+    if (!player2->isAttacking())
+      player2->attack("SwingForehand");
+  }
+  else if (state[SDL_SCANCODE_PERIOD])
+  {
+    if (!player2->isAttacking())
+      player2->attack("SwingDiagonal");
+  }
+
+  // Blocking
+  if (state[SDL_SCANCODE_SLASH] && !player2->isAttacking() && !player2->isJumping())
+  {
+    if (!player2->isBlocking())
+      player2->block();
+  }
+  else
+  {
+    if (player2->isBlocking())
+    {
+      player2->stopBlocking();
+    }
+  }
+
+  player2->update();
   // player2->printInfo("Player2");
 
   // Collision detection
@@ -137,4 +217,20 @@ void Play::update(Player *player1, Player *player2)
       player1->attackHit = true;
     }
   }
+  else if (player2->isAttacking() && !player2->attackHit)
+  {
+    if (Game::checkCollision(player2->getAttackingHitboxes(), player1->getHitbox()))
+    {
+      player1->takeDamage(20);
+      player2->attackHit = true;
+    }
+  }
+}
+
+void Play::initGameEnd(const char *winner)
+{
+  std::string concatedString = std::string(winner) + " won!";
+  winnerText = new Button("text", 0, Game::fullscreen ? 162 * 1.5 : 162, concatedString.c_str(), 6, true);
+
+  gameEnded = true;
 }

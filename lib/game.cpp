@@ -149,10 +149,11 @@ bool Game::checkCollision(const SDL_Rect &a, const SDL_Rect &b)
 void Game::initGameEntites()
 {
   std::string player1Path = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
-  player1 = new Player(player1Path.c_str(), 0, Game::windowHeight, true, 2);
+  player1 = new Player(player1Path.c_str(), 128 * 2, Game::windowHeight, true, 2);
 
-  std::string player2Path = std::string(basePath) + "assets/sprites/Samurai_Commander/Samurai_Commander_Spritelist.png";
-  player2 = new Player(player2Path.c_str(), Game::windowWidth - 128 * 2, Game::windowHeight, true, 2);
+  std::string player2Path = std::string(basePath) + "assets/sprites/Samurai/Samurai_Spritelist.png";
+  player2 = new Player(player2Path.c_str(), Game::windowWidth - 128 * 4, Game::windowHeight, true, 2);
+  player2->flip = SDL_FLIP_HORIZONTAL;
 }
 
 void Game::clearGameEntites()
