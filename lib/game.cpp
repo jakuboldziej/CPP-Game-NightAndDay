@@ -100,7 +100,7 @@ void Game::handleEvents()
   }
   else if (gameState == PLAY)
   {
-    play->handleEvents(event, gameState);
+    play->handleEvents(mousePosition, event, gameState);
   }
   else if (gameState == PAUSE)
   {

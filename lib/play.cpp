@@ -9,11 +9,31 @@ Play::Play()
 }
 Play::~Play() {}
 
-void Play::handleEvents(SDL_Event event, GameState &gameState)
+void Play::handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &gameState)
 {
   if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)
   {
     gameState = PAUSE;
+  }
+  else if (event.type == SDL_MOUSEBUTTONDOWN && gameEnded)
+  {
+    SDL_GetMouseState(&mousePosition.x, &mousePosition.y);
+
+    SDL_Rect rematchRect = buttons["Rematch"]->getDstRect();
+    SDL_Rect quitRect = buttons["Quit"]->getDstRect();
+
+    if (SDL_PointInRect(&mousePosition, &rematchRect))
+    {
+      Game::clearGameEntites();
+      Game::initGameEntites();
+      gameEnded = false;
+    }
+    else if (SDL_PointInRect(&mousePosition, &quitRect))
+    {
+      gameState = MENU;
+      gameEnded = false;
+      Game::clearGameEntites();
+    }
   }
 }
 

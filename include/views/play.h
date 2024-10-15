@@ -12,7 +12,7 @@ public:
   Play();
   ~Play();
 
-  void handleEvents(SDL_Event event, GameState &gameState);
+  void handleEvents(SDL_Point &mousePosition, SDL_Event event, GameState &gameState);
   void render(Player *player1, Player *player2);
   void update(Player *player1, Player *player2);
 
