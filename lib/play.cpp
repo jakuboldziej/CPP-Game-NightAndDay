@@ -169,12 +169,12 @@ void Play::update(Player *player1, Player *player2)
 
   if (player2->canMove())
   {
-    if (state[SDL_SCANCODE_I])
+    if (state[SDL_SCANCODE_U])
     {
       if (player2->isOnGround())
         player2->jump();
     }
-    if (state[SDL_SCANCODE_J])
+    if (state[SDL_SCANCODE_HOME])
     {
       player2->move(-1, 0, player1);
 
@@ -183,7 +183,7 @@ void Play::update(Player *player1, Player *player2)
 
       player2->flip = SDL_FLIP_HORIZONTAL;
     }
-    else if (state[SDL_SCANCODE_L])
+    else if (state[SDL_SCANCODE_K])
     {
       player2->move(1, 0, player1);
       if (player2->isOnGround())

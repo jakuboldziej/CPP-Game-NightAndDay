@@ -60,9 +60,20 @@ public:
     hitboxSizes.emplace("Block", idleHitbox);
 
     attackHitboxMap["SwingBackhand"][0] = Hitbox(0, 0, 0, 0);
-    attackHitboxMap["SwingBackhand"][1] = Hitbox(128, 128, 0, 0);
+    attackHitboxMap["SwingBackhand"][1] = Hitbox(0, 0, 0, 0);
     attackHitboxMap["SwingBackhand"][2] = Hitbox(94, 105, 94, 71);
     attackHitboxMap["SwingBackhand"][3] = Hitbox(94, 105, 94, 71);
+
+    attackHitboxMap["SwingForehand"][0] = Hitbox(73, 115, 30, 51);
+    attackHitboxMap["SwingForehand"][1] = Hitbox(91, 91, 50, 30);
+    attackHitboxMap["SwingForehand"][2] = Hitbox(105, 84, 64, 25);
+    attackHitboxMap["SwingForehand"][3] = Hitbox(113, 77, 94, 30);
+    attackHitboxMap["SwingForehand"][4] = Hitbox(95, 114, 91, 95);
+
+    attackHitboxMap["SwingDiagonal"][0] = Hitbox(118, 91, 56, 63);
+    attackHitboxMap["SwingDiagonal"][1] = Hitbox(88, 118, 7, 90);
+    attackHitboxMap["SwingDiagonal"][2] = Hitbox(116, 112, 88, 60);
+    attackHitboxMap["SwingDiagonal"][3] = Hitbox(116, 117, 83, 58);
 
     for (auto &hitboxSize : hitboxSizes)
     {
@@ -226,6 +237,32 @@ private:
       int currentFrame = (timeElapsed / animations[attackType].speed) % totalFrames;
 
       if (strcmp(attackType, "SwingBackhand") == 0 && attackHitboxMap[attackType][currentFrame].offsetX != 0)
+      {
+        attackHitboxRect.w = dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth;
+        attackHitboxRect.h = dstRect.h - attackHitboxMap[attackType][currentFrame].offsetHeight;
+        attackHitboxRect.y = dstRect.y + attackHitboxMap[attackType][currentFrame].offsetY;
+
+        if (flip == SDL_FLIP_HORIZONTAL)
+          attackHitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth) - attackHitboxMap[attackType][currentFrame].offsetX;
+        else
+        {
+          attackHitboxRect.x = dstRect.x + attackHitboxMap[attackType][currentFrame].offsetX;
+        }
+      }
+      else if (strcmp(attackType, "SwingForehand") == 0 && attackHitboxMap[attackType][currentFrame].offsetX != 0)
+      {
+        attackHitboxRect.w = dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth;
+        attackHitboxRect.h = dstRect.h - attackHitboxMap[attackType][currentFrame].offsetHeight;
+        attackHitboxRect.y = dstRect.y + attackHitboxMap[attackType][currentFrame].offsetY;
+
+        if (flip == SDL_FLIP_HORIZONTAL)
+          attackHitboxRect.x = dstRect.x + dstRect.w - (dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth) - attackHitboxMap[attackType][currentFrame].offsetX;
+        else
+        {
+          attackHitboxRect.x = dstRect.x + attackHitboxMap[attackType][currentFrame].offsetX;
+        }
+      }
+      else if (strcmp(attackType, "SwingDiagonal") == 0 && attackHitboxMap[attackType][currentFrame].offsetX != 0)
       {
         attackHitboxRect.w = dstRect.w - attackHitboxMap[attackType][currentFrame].offsetWidth;
         attackHitboxRect.h = dstRect.h - attackHitboxMap[attackType][currentFrame].offsetHeight;
