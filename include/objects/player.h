@@ -110,6 +110,8 @@ public:
   bool isAttacking() { return attacking; }
   SDL_Rect getAttackingHitboxes() { return attackHitboxRect; }
 
+  Uint32 blockDisabledStartTime = 0;
+  bool canBlock = true;
   void block()
   {
     play("Block");
@@ -119,8 +121,8 @@ public:
   bool isBlocking() { return blocking; }
   void stopBlocking()
   {
-
     blocking = false;
+    blockDisabledStartTime = SDL_GetTicks();
   }
 
   void takeDamage(int damage)
@@ -152,6 +154,8 @@ public:
 
   void update()
   {
+    handleBlockCooldown();
+
     if (blocking)
     {
       handleBlocking();
@@ -205,6 +209,14 @@ private:
 
   int maxHealth;
   int currentHealth;
+
+  void handleBlockCooldown()
+  {
+    if (!canBlock && SDL_GetTicks() - blockDisabledStartTime >= 1000)
+    {
+      canBlock = true;
+    }
+  }
 
   void applyGravity()
   {

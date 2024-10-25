@@ -149,7 +149,7 @@ void Play::update(Player *player1, Player *player2)
   }
 
   // Blocking
-  if (state[SDL_SCANCODE_B] && !player1->isAttacking() && !player1->isJumping())
+  if (state[SDL_SCANCODE_B] && !player1->isAttacking() && !player1->isJumping() && player1->canBlock)
   {
     if (!player1->isBlocking())
       player1->block();
@@ -212,7 +212,7 @@ void Play::update(Player *player1, Player *player2)
   }
 
   // Blocking
-  if (state[SDL_SCANCODE_SLASH] && !player2->isAttacking() && !player2->isJumping())
+  if (state[SDL_SCANCODE_SLASH] && !player2->isAttacking() && !player2->isJumping() && player2->canBlock)
   {
     if (!player2->isBlocking())
       player2->block();
@@ -236,7 +236,8 @@ void Play::update(Player *player1, Player *player2)
     {
       if (player2->isBlocking())
       {
-        std::cout << "Attack blocked" << std::endl;
+        player2->stopBlocking();
+        player2->canBlock = false;
       }
       else
       {
@@ -251,7 +252,8 @@ void Play::update(Player *player1, Player *player2)
     {
       if (player1->isBlocking())
       {
-        std::cout << "Attack blocked" << std::endl;
+        player1->stopBlocking();
+        player1->canBlock = false;
       }
       else
       {
