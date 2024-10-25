@@ -174,7 +174,7 @@ void Play::update(Player *player1, Player *player2)
       if (player2->isOnGround())
         player2->jump();
     }
-    if (state[SDL_SCANCODE_HOME])
+    if (state[SDL_SCANCODE_H])
     {
       player2->move(-1, 0, player1);
 
@@ -229,20 +229,35 @@ void Play::update(Player *player1, Player *player2)
   // player2->printInfo("Player2");
 
   // Collision detection
+
   if (player1->isAttacking() && !player1->attackHit)
   {
     if (Game::checkCollision(player1->getAttackingHitboxes(), player2->getHitbox()))
     {
-      player2->takeDamage(20);
-      player1->attackHit = true;
+      if (player2->isBlocking())
+      {
+        std::cout << "Attack blocked" << std::endl;
+      }
+      else
+      {
+        player2->takeDamage(20);
+        player1->attackHit = true;
+      }
     }
   }
   else if (player2->isAttacking() && !player2->attackHit)
   {
     if (Game::checkCollision(player2->getAttackingHitboxes(), player1->getHitbox()))
     {
-      player1->takeDamage(20);
-      player2->attackHit = true;
+      if (player1->isBlocking())
+      {
+        std::cout << "Attack blocked" << std::endl;
+      }
+      else
+      {
+        player1->takeDamage(20);
+        player2->attackHit = true;
+      }
     }
   }
 }
