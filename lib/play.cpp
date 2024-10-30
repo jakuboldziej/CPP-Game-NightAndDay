@@ -1,11 +1,18 @@
 #include "views/play.h"
 
 Button *winnerText;
+Button *timeText;
+
+int roundTime = 90;
+Uint32 roundStartTime;
 
 Play::Play()
 {
   buttons["Rematch"] = new Button("text", 0, Game::fullscreen ? 341 * 1.5 : 341, "Rematch", 5, true);
   buttons["Quit"] = new Button("text", 0, Game::fullscreen ? 493 * 1.5 : 493, "Quit", 5, true);
+
+  roundStartTime = SDL_GetTicks();
+  timeText = new Button("text", 0, Game::fullscreen ? 493 * 1.5 : 10, std::to_string(roundTime).c_str(), 4, true);
 }
 Play::~Play() {}
 
@@ -45,6 +52,8 @@ void Play::render(Player *player1, Player *player2)
     buttons["Rematch"]->render(true);
     buttons["Quit"]->render(true);
   }
+
+  timeText->render();
 
   player1->render();
   player2->render();

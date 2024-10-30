@@ -63,6 +63,11 @@ public:
 
   SDL_RendererFlip flip = SDL_FLIP_NONE;
 
+  void setText(const char *newText)
+  {
+    this->typeStr = newText;
+  }
+
 protected:
   int x;
   int y;
